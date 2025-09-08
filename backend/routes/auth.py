@@ -45,4 +45,10 @@ def get_current_user_info(
         "provider": user.get("provider"),
         "has_profile": bool(user.get("profile_id")),
         "profile_id": user.get("profile_id"),
+        "email_verified": user.get(
+            "email_verified", True
+        ),  # Default to True for OAuth users
+        "profile_completed": user.get(
+            "profile_completed", False
+        ),  # Default to False for new users
     }

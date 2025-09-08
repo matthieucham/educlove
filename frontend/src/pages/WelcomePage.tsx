@@ -80,7 +80,7 @@ const WelcomePage: React.FC = () => {
           ) : (
             <>
               <Link to="/login" className="font-semibold text-purple-600 hover:text-purple-700">Se connecter</Link>
-              <Link to="/register" className="font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition duration-200">S'inscrire</Link>
+              <Link to="/create-account" className="font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition duration-200">S'inscrire</Link>
             </>
           )}
         </div>

@@ -1,9 +1,14 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useEffect } from 'react'
 
-export const ProtectedRoute = () => {
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore()
+interface ProtectedRouteProps {
+  requireProfile?: boolean
+}
+
+export const ProtectedRoute = ({ requireProfile = true }: ProtectedRouteProps = {}) => {
+  const { isAuthenticated, isLoading, checkAuth, user } = useAuthStore()
+  const location = useLocation()
 
   useEffect(() => {
     // Check auth status on mount
@@ -27,6 +32,22 @@ export const ProtectedRoute = () => {
     return <Navigate to="/login" replace />
   }
 
-  // Render child routes if authenticated
+  // Check if email is verified
+  if (user && user.email_verified === false) {
+    // Redirect to email verification page if email is not verified
+    return <Navigate to="/email-verification" state={{ email: user.email }} replace />
+  }
+
+  // Check if profile is completed (only for routes that require it)
+  if (requireProfile && user && !user.profile_completed) {
+    // Allow access to complete-profile page
+    if (location.pathname === '/complete-profile') {
+      return <Outlet />
+    }
+    // Redirect to profile completion page if profile is not completed
+    return <Navigate to="/complete-profile" replace />
+  }
+
+  // Render child routes if all checks pass
   return <Outlet />
 }

@@ -47,10 +47,18 @@ class Location(BaseModel):
 class Profile(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     age: int = Field(..., gt=17)
+    gender: Optional[str] = Field(None, max_length=20, description="User's gender")
     location: Location = Field(
         ..., description="Geolocation information for the profile"
     )
-    looking_for: LookingForEnum
+    looking_for: List[str] = Field(
+        ...,
+        min_length=1,
+        description="What the user is looking for (multiple selections allowed)",
+    )
+    looking_for_gender: List[str] = Field(
+        ..., min_length=1, description="Gender preferences (MALE, FEMALE, OTHER)"
+    )
     subject: str = Field(..., min_length=1, max_length=100)
     experience_years: int = Field(..., ge=0)
     photos: List[str] = []
@@ -65,8 +73,10 @@ class Profile(BaseModel):
             "example": {
                 "first_name": "Jane",
                 "age": 28,
+                "gender": "FEMALE",
                 "location": {"city_name": "Paris", "coordinates": [2.3522, 48.8566]},
-                "looking_for": "Relation sérieuse",
+                "looking_for": ["Amitié", "Relation sérieuse"],
+                "looking_for_gender": ["MALE", "FEMALE"],
                 "subject": "Mathématiques",
                 "experience_years": 5,
                 "photos": ["http://example.com/photo1.jpg"],
@@ -132,6 +142,12 @@ class User(BaseModel):
     profile_id: Optional[str] = Field(
         None, description="Associated profile ID if user has created a profile"
     )
+    email_verified: bool = Field(
+        default=False, description="Whether the email has been verified"
+    )
+    profile_completed: bool = Field(
+        default=False, description="Whether the user has completed their profile"
+    )
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -145,6 +161,8 @@ class User(BaseModel):
                 "picture": "https://example.com/photo.jpg",
                 "provider": "google",
                 "profile_id": "507f1f77bcf86cd799439011",
+                "email_verified": True,
+                "profile_completed": True,
             }
         }
 

@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import CompleteProfilePage from './pages/CompleteProfilePage';
+import CreateAccountPage from './pages/CreateAccountPage';
+import EmailVerificationPage from './pages/EmailVerificationPage';
 import SearchCriteriaPage from './pages/SearchCriteriaPage';
 import ProfilesPage from './pages/ProfilesPage';
 import EditProfilePage from './pages/EditProfilePage';
@@ -25,10 +27,16 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/create-account" element={<CreateAccountPage />} />
+        <Route path="/email-verification" element={<EmailVerificationPage />} />
 
-        {/* Protected routes */}
-        <Route element={<ProtectedRoute />}>
+        {/* Semi-protected route (requires auth but not complete profile) */}
+        <Route element={<ProtectedRoute requireProfile={false} />}>
+          <Route path="/complete-profile" element={<CompleteProfilePage />} />
+        </Route>
+
+        {/* Fully protected routes (requires auth + complete profile) */}
+        <Route element={<ProtectedRoute requireProfile={true} />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/search-criteria" element={<SearchCriteriaPage />} />
           <Route path="/profiles" element={<ProfilesPage />} />

@@ -74,6 +74,12 @@ class MongoDatabase(Database):
     def get_user_by_id(self, user_id: str) -> Optional[Dict[str, Any]]:
         return self.users_repo.get_user_by_id(user_id)
 
+    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        return self.users_repo.get_user_by_email(email)
+
+    def update_user_last_login(self, user_id: str) -> bool:
+        return self.users_repo.update_user_last_login(user_id)
+
     # Match methods - delegate to MatchesRepository
     def create_match(self, match_data: Dict[str, Any]) -> str:
         return self.matches_repo.create_match(match_data)

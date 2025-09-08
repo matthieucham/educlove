@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import os
 
 # Import route modules
-from routes import auth, profiles, matches
+from routes import auth, profiles, matches, registration
 
 # Define the database instance
 db = MongoDatabase()
@@ -46,6 +46,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(profiles.router)
 app.include_router(matches.router)
+app.include_router(registration.router, prefix="/api")
 
 # Include development auth router if in development mode
 if os.getenv("SKIP_JWT_VERIFICATION", "false").lower() == "true":

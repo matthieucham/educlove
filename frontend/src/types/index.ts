@@ -1,13 +1,15 @@
 // User and Authentication Types
 export interface User {
-  id: string
+  user_id: string
   sub: string
   email: string
   name?: string
   picture?: string
-  provider?: string
-  has_profile?: boolean
+  provider: string
+  has_profile: boolean
   profile_id?: string
+  email_verified?: boolean
+  profile_completed?: boolean
 }
 
 export interface LoginCredentials {

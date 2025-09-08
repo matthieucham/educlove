@@ -130,8 +130,9 @@ async def create_my_profile(
         profile_data = profile.model_dump(by_alias=True)
         profile_id = db.create_profile(profile_data)
 
-        # Link the profile to the user
+        # Link the profile to the user and mark profile as completed
         db.users_repo.update_user_profile(user_id, profile_id)
+        db.users_repo.update_user(user_id, {"profile_completed": True})
 
         return {"profile_id": profile_id, "message": "Profile created successfully"}
     except HTTPException:
@@ -139,6 +140,28 @@ async def create_my_profile(
     except Exception as e:
         logger.error(f"Error creating profile: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/completion-status")
+def get_profile_completion_status(
+    current_user: User = Depends(get_current_user),
+    db: "MongoDatabase" = Depends(get_db),
+):
+    """
+    Check if the authenticated user has completed their profile.
+    """
+    # Get user from database
+    user = db.get_user_by_sub(current_user.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    return {
+        "profile_completed": user.get("profile_completed", False),
+        "has_profile": bool(user.get("profile_id")),
+        "profile_id": user.get("profile_id"),
+    }
 
 
 @router.get("/my-profile")
