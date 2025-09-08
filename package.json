@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "embla-carousel-autoplay": "^8.6.0"
+  },
+  "scripts": {
+    "seed": "sleep 1 && backend/venv/bin/python -m backend.database.seed"
+  }
+}

@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pymongo
+pydantic[email]
+python-jose[cryptography]
+python-dotenv
+aiohttp
