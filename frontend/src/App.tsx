@@ -9,6 +9,7 @@ import EditProfilePage from './pages/EditProfilePage';
 import DashboardPage from './pages/DashboardPage';
 import MyMatchesPage from './pages/MyMatchesPage';
 import WelcomePage from './pages/WelcomePage';
+import ComponentsDemo from './pages/ComponentsDemo';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
@@ -29,6 +30,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/create-account" element={<CreateAccountPage />} />
         <Route path="/email-verification" element={<EmailVerificationPage />} />
+        <Route path="/components-demo" element={<ComponentsDemo />} />
 
         {/* Semi-protected route (requires auth but not complete profile) */}
         <Route element={<ProtectedRoute requireProfile={false} />}>

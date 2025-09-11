@@ -14,6 +14,50 @@ const Icon = ({ path, className = "w-5 h-5" }: { path: string; className?: strin
   </svg>
 );
 
+const MultiSelect = ({
+  label,
+  options,
+  selected = [],
+  onSelectionChange,
+  required = false
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  selected?: string[];
+  onSelectionChange: (selected: string[]) => void;
+  required?: boolean;
+}) => {
+  const toggleOption = (value: string) => {
+    const newSelection = selected.includes(value)
+      ? selected.filter(item => item !== value)
+      : [...selected, value];
+    onSelectionChange(newSelection);
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label} {required && '*'}
+      </label>
+      <div className="flex flex-wrap gap-2">
+        {options.map(option => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => toggleOption(option.value)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${selected.includes(option.value)
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-purple-100 border border-gray-300'
+              }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const MenuBar = ({ editor }: { editor: any }) => {
   if (!editor) {
     return null;
@@ -340,6 +384,7 @@ const EditProfilePage: React.FC = () => {
             )}
           </div>
 
+
           {/* Map Modal */}
           {isMapVisible && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -373,116 +418,28 @@ const EditProfilePage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vous recherchez *
-              </label>
-              <div className="space-y-2 border border-gray-300 rounded-lg p-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="Amitié"
-                    checked={lookingFor.includes('Amitié')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingFor([...lookingFor, 'Amitié']);
-                      } else {
-                        setLookingFor(lookingFor.filter(v => v !== 'Amitié'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Amitié</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="Relation légère"
-                    checked={lookingFor.includes('Relation légère')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingFor([...lookingFor, 'Relation légère']);
-                      } else {
-                        setLookingFor(lookingFor.filter(v => v !== 'Relation légère'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Relation légère</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="Relation sérieuse"
-                    checked={lookingFor.includes('Relation sérieuse')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingFor([...lookingFor, 'Relation sérieuse']);
-                      } else {
-                        setLookingFor(lookingFor.filter(v => v !== 'Relation sérieuse'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Relation sérieuse</span>
-                </label>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Avec *
-              </label>
-              <div className="space-y-2 border border-gray-300 rounded-lg p-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="MALE"
-                    checked={lookingForGender.includes('MALE')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingForGender([...lookingForGender, 'MALE']);
-                      } else {
-                        setLookingForGender(lookingForGender.filter(v => v !== 'MALE'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Homme</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="FEMALE"
-                    checked={lookingForGender.includes('FEMALE')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingForGender([...lookingForGender, 'FEMALE']);
-                      } else {
-                        setLookingForGender(lookingForGender.filter(v => v !== 'FEMALE'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Femme</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="OTHER"
-                    checked={lookingForGender.includes('OTHER')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingForGender([...lookingForGender, 'OTHER']);
-                      } else {
-                        setLookingForGender(lookingForGender.filter(v => v !== 'OTHER'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Autre</span>
-                </label>
-              </div>
-            </div>
+            <MultiSelect
+              label="Vous recherchez"
+              options={[
+                { value: 'Amitié', label: 'Amitié' },
+                { value: 'Relation légère', label: 'Relation légère' },
+                { value: 'Relation sérieuse', label: 'Relation sérieuse' }
+              ]}
+              selected={lookingFor}
+              onSelectionChange={setLookingFor}
+              required={true}
+            />
+            <MultiSelect
+              label="Avec"
+              options={[
+                { value: 'MALE', label: 'Homme' },
+                { value: 'FEMALE', label: 'Femme' },
+                { value: 'OTHER', label: 'Autre' }
+              ]}
+              selected={lookingForGender}
+              onSelectionChange={setLookingForGender}
+              required={true}
+            />
           </div>
 
           <div>
