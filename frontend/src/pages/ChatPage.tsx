@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { Card, Avatar, Badge } from '../components/ui';
 
 const ChatPage: React.FC = () => {
   // Placeholder data for chats
@@ -27,46 +28,55 @@ const ChatPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl p-6 max-w-2xl w-full">
+      <Card className="max-w-2xl w-full p-6">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">Conversations</h1>
         <div className="space-y-3">
           {chats.map((chat) => (
-            <div
+            <Card
               key={chat.id}
-              className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition duration-200 flex items-center"
+              variant="bordered"
+              className="p-4 cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition duration-200"
               onClick={() => alert(`Opening chat with ${chat.name}`)}
             >
-              <div className="relative">
-                <img 
-                  src={chat.avatar} 
-                  alt={chat.name}
-                  className="w-14 h-14 rounded-full mr-4 object-cover"
-                />
-                {chat.unread > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {chat.unread}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h2 className="text-lg font-semibold text-gray-800">{chat.name}</h2>
-                  <span className="text-xs text-gray-500">{chat.time}</span>
+              <div className="flex items-center">
+                <div className="relative">
+                  <Avatar
+                    src={chat.avatar}
+                    alt={chat.name}
+                    size="lg"
+                    className="mr-4"
+                  />
+                  {chat.unread > 0 && (
+                    <Badge
+                      variant="primary"
+                      className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs rounded-full"
+                    >
+                      {chat.unread}
+                    </Badge>
+                  )}
                 </div>
-                <p className={`text-sm mt-1 ${chat.unread > 0 ? 'text-gray-800 font-medium' : 'text-gray-600'}`}>
-                  {chat.lastMessage}
-                </p>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-lg font-semibold text-gray-800">{chat.name}</h2>
+                    <Badge variant="secondary" className="text-xs">
+                      {chat.time}
+                    </Badge>
+                  </div>
+                  <p className={`text-sm mt-1 ${chat.unread > 0 ? 'text-gray-800 font-medium' : 'text-gray-600'}`}>
+                    {chat.lastMessage}
+                  </p>
+                </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
         {chats.length === 0 && (
-          <div className="text-center py-12">
+          <Card variant="bordered" className="text-center py-12 bg-gray-50">
             <p className="text-gray-600">Aucune conversation pour le moment</p>
             <p className="text-sm text-gray-500 mt-2">Commencez à matcher pour démarrer des conversations !</p>
-          </div>
+          </Card>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

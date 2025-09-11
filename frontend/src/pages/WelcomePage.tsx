@@ -4,6 +4,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import Logo from '../components/Logo';
 import { useAuthStore } from '../store/authStore';
+import { Button, Card } from '../components/ui';
 
 // A helper component for the icons to keep the main component cleaner.
 const Icon = ({ path, className = "w-5 h-5" }: { path: string; className?: string }) => (
@@ -64,30 +65,42 @@ const WelcomePage: React.FC = () => {
         <div className="space-x-4 flex items-center">
           {isAuthenticated ? (
             <>
-              <Link
-                to="/dashboard"
-                className="font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition duration-200"
+              <Button
+                variant="primary"
+                onClick={() => navigate('/dashboard')}
               >
                 Mon Profil
-              </Link>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={handleLogout}
-                className="font-semibold text-purple-600 hover:text-purple-700 transition duration-200"
+                className="text-purple-600 hover:text-purple-700"
               >
                 Se déconnecter
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <Link to="/login" className="font-semibold text-purple-600 hover:text-purple-700">Se connecter</Link>
-              <Link to="/create-account" className="font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition duration-200">S'inscrire</Link>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/login')}
+                className="text-purple-600 hover:text-purple-700"
+              >
+                Se connecter
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => navigate('/create-account')}
+              >
+                S'inscrire
+              </Button>
             </>
           )}
         </div>
       </nav>
 
       <main className="flex flex-col items-center justify-center flex-grow text-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl w-full">
+        <Card className="max-w-4xl w-full p-8">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">La rencontre entre profs, partout en France !</h2>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
             Que vous soyez en poste à Paris, en vacances en Bretagne ou muté à Marseille, trouvez votre perle rare aux <s className="line-through">quatre</s> six coins de l'hexagone.
@@ -102,25 +115,40 @@ const WelcomePage: React.FC = () => {
               ))}
             </div>
             <div className="absolute top-1/2 -translate-y-1/2 left-2 z-20">
-              <button className="embla__prev bg-black/50 text-white rounded-full p-2 hover:bg-black" onClick={scrollPrev} aria-label="previous">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-black/50 text-white rounded-full p-2 hover:bg-black"
+                onClick={scrollPrev}
+                aria-label="previous"
+              >
                 <Icon path="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" />
-              </button>
+              </Button>
             </div>
             <div className="absolute top-1/2 -translate-y-1/2 right-2 z-20">
-              <button className="embla__next bg-black/50 text-white rounded-full p-2 hover:bg-black" onClick={scrollNext} aria-label="next">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-black/50 text-white rounded-full p-2 hover:bg-black"
+                onClick={scrollNext}
+                aria-label="next"
+              >
                 <Icon path="M4.293 4.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
-              </button>
+              </Button>
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 h-2.5 rounded-full" style={{ width: `${scrollProgress * 100}%` }}></div>
           </div>
-          <Link to="/profiles">
-            <button className="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-pink-700 transition duration-200">
-              Voir les profils
-            </button>
-          </Link>
-        </div>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => navigate('/profiles')}
+            className="mt-8"
+          >
+            Voir les profils
+          </Button>
+        </Card>
       </main>
     </div>
   );

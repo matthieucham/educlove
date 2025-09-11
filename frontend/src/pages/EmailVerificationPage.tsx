@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { api } from '../services/api';
+import { Button, Card, Loading } from '../components/ui';
 
 const EmailVerificationPage: React.FC = () => {
     const location = useLocation();
@@ -36,7 +37,7 @@ const EmailVerificationPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center px-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+            <Card className="max-w-md w-full p-8">
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4 p-4">
@@ -65,7 +66,7 @@ const EmailVerificationPage: React.FC = () => {
                 </div>
 
                 {/* Instructions */}
-                <div className="bg-purple-50 rounded-lg p-4 mb-6">
+                <Card variant="bordered" className="bg-purple-50 p-4 mb-6">
                     <h2 className="font-semibold text-gray-800 mb-2">Prochaines étapes :</h2>
                     <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
                         <li>Ouvrez votre boîte mail</li>
@@ -74,7 +75,7 @@ const EmailVerificationPage: React.FC = () => {
                         <li>Connectez-vous avec votre mot de passe</li>
                         <li>Complétez votre profil pour accéder à l'application</li>
                     </ol>
-                </div>
+                </Card>
 
                 {/* Resend success message */}
                 {resendMessage && (
@@ -92,13 +93,22 @@ const EmailVerificationPage: React.FC = () => {
 
                 {/* Resend email button */}
                 <div className="mb-6">
-                    <button
+                    <Button
                         onClick={handleResendEmail}
                         disabled={resending}
-                        className="w-full bg-white border-2 border-purple-600 text-purple-600 py-3 rounded-lg font-semibold hover:bg-purple-50 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
                     >
-                        {resending ? 'Envoi en cours...' : 'Renvoyer l\'email de vérification'}
-                    </button>
+                        {resending ? (
+                            <div className="flex items-center justify-center gap-2">
+                                <Loading size="sm" />
+                                <span>Envoi en cours...</span>
+                            </div>
+                        ) : (
+                            'Renvoyer l\'email de vérification'
+                        )}
+                    </Button>
                 </div>
 
                 {/* Spam folder notice */}
@@ -123,11 +133,14 @@ const EmailVerificationPage: React.FC = () => {
 
                 {/* Login button */}
                 <div className="mb-4">
-                    <Link to="/login">
-                        <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition duration-200">
-                            Se connecter pour continuer
-                        </button>
-                    </Link>
+                    <Button
+                        onClick={() => navigate('/login')}
+                        variant="primary"
+                        size="lg"
+                        className="w-full"
+                    >
+                        Se connecter pour continuer
+                    </Button>
                 </div>
 
                 {/* Support link */}
@@ -146,7 +159,7 @@ const EmailVerificationPage: React.FC = () => {
                         ← Retour à l'accueil
                     </Link>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };

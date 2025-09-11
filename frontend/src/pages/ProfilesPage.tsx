@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Book, Briefcase, Heart, Users, Camera } from 'lucide-react';
+import { MapPin, Book, Briefcase, Heart, Camera } from 'lucide-react';
 import Logo from '../components/Logo';
 import { api } from '../services/api';
+import { Button, Card, Loading, Badge } from '../components/ui';
 
 interface Profile {
   _id: string;
@@ -92,7 +93,7 @@ const ProfilesPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <Loading size="lg" />
           <p className="mt-4 text-gray-600">Chargement des profils...</p>
         </div>
       </div>
@@ -115,18 +116,19 @@ const ProfilesPage: React.FC = () => {
             </Link>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <Card className="max-w-md w-full text-center p-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Aucun profil trouvé</h2>
           <p className="text-gray-600 mb-6">
             {error || 'Aucun profil ne correspond à vos critères de recherche.'}
           </p>
-          <Link
-            to="/search-criteria"
-            className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700"
+          <Button
+            variant="primary"
+            onClick={() => window.location.href = '/search-criteria'}
+            className="inline-block"
           >
             Modifier les critères
-          </Link>
-        </div>
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -164,7 +166,7 @@ const ProfilesPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white shadow-xl rounded-2xl max-w-md w-full overflow-hidden">
+      <Card className="max-w-md w-full overflow-hidden p-0">
         {/* Photos Section */}
         <div className="relative">
           <img
@@ -176,19 +178,32 @@ const ProfilesPage: React.FC = () => {
 
           {/* Photo Navigation */}
           {photos.length > 1 && (
-            <div className="absolute top-2 right-2 bg-black/50 text-white text-xs rounded-full px-2 py-1 flex items-center">
+            <Badge
+              variant="secondary"
+              className="absolute top-2 right-2 bg-black/50 text-white flex items-center"
+            >
               <Camera size={14} className="mr-1" /> {currentPhotoIndex + 1} / {photos.length}
-            </div>
+            </Badge>
           )}
           <div className="absolute top-1/2 left-2 transform -translate-y-1/2">
-            <button onClick={prevPhoto} className="text-white/70 hover:text-white transition-opacity">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={prevPhoto}
+              className="text-white/70 hover:text-white p-1"
+            >
               &#10094;
-            </button>
+            </Button>
           </div>
           <div className="absolute top-1/2 right-2 transform -translate-y-1/2">
-            <button onClick={nextPhoto} className="text-white/70 hover:text-white transition-opacity">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={nextPhoto}
+              className="text-white/70 hover:text-white p-1"
+            >
               &#10095;
-            </button>
+            </Button>
           </div>
 
           {/* Main Info */}
@@ -235,24 +250,28 @@ const ProfilesPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex justify-around p-4 bg-gray-50 border-t">
-          <button
-            className="bg-white border-2 border-gray-300 text-gray-600 hover:border-red-400 hover:text-red-500 hover:bg-red-50 p-4 rounded-full shadow-md transform transition-all duration-200 hover:scale-110"
+          <Button
+            variant="outline"
+            size="lg"
             onClick={handleSwipe}
+            className="border-2 border-gray-300 text-gray-600 hover:border-red-400 hover:text-red-500 hover:bg-red-50 p-4 rounded-full shadow-md transform transition-all duration-200 hover:scale-110"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
-          <button
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-md transform transition-all duration-200 hover:scale-110 hover:from-purple-700 hover:to-pink-700"
+          </Button>
+          <Button
+            variant="primary"
+            size="lg"
             onClick={handleSwipe}
+            className="p-4 rounded-full shadow-md transform transition-all duration-200 hover:scale-110"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

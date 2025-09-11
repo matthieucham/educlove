@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { api } from '../services/api';
+import { Button, Input, Card, Loading } from '../components/ui';
 
 interface PasswordStrength {
     score: number;
@@ -128,9 +129,22 @@ const CreateAccountPage: React.FC = () => {
         return `${(passwordStrength.score / 6) * 100}%`;
     };
 
+    const EyeIcon = ({ show }: { show: boolean }) => (
+        show ? (
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+        ) : (
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+        )
+    );
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center px-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+            <Card className="max-w-md w-full p-8">
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4 p-4">
@@ -149,37 +163,27 @@ const CreateAccountPage: React.FC = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* First Name (optional) */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="firstName">
-                            Prénom (optionnel)
-                        </label>
-                        <input
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            id="firstName"
-                            type="text"
-                            placeholder="Votre prénom"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                        />
-                    </div>
+                    <Input
+                        id="firstName"
+                        type="text"
+                        label="Prénom (optionnel)"
+                        placeholder="Votre prénom"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                    />
 
                     {/* Email */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-                            Email professionnel
-                        </label>
-                        <input
-                            className={`w-full px-4 py-2 border ${emailError ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                        <Input
                             id="email"
                             type="email"
+                            label="Email professionnel"
                             placeholder="prenom.nom@ac-paris.fr"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            error={emailError}
                             required
                         />
-                        {emailError && (
-                            <p className="mt-1 text-sm text-red-600">{emailError}</p>
-                        )}
                         <p className="mt-1 text-xs text-gray-500">
                             Utilisez votre adresse académique (ac-*.fr) ou education.gouv.fr
                         </p>
@@ -187,14 +191,11 @@ const CreateAccountPage: React.FC = () => {
 
                     {/* Password */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">
-                            Mot de passe
-                        </label>
                         <div className="relative">
-                            <input
-                                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            <Input
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
+                                label="Mot de passe"
                                 placeholder="Créez un mot de passe fort"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -202,19 +203,10 @@ const CreateAccountPage: React.FC = () => {
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                className="absolute top-[38px] right-3 flex items-center"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? (
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                    </svg>
-                                ) : (
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                )}
+                                <EyeIcon show={showPassword} />
                             </button>
                         </div>
 
@@ -248,40 +240,25 @@ const CreateAccountPage: React.FC = () => {
 
                     {/* Confirm Password */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
-                            Confirmer le mot de passe
-                        </label>
                         <div className="relative">
-                            <input
-                                className={`w-full px-4 py-2 pr-10 border ${confirmPassword && password !== confirmPassword ? 'border-red-500' : 'border-gray-300'
-                                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                            <Input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? 'text' : 'password'}
+                                label="Confirmer le mot de passe"
                                 placeholder="Confirmez votre mot de passe"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
+                                error={confirmPassword && password !== confirmPassword ? 'Les mots de passe ne correspondent pas' : undefined}
                                 required
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                className="absolute top-[38px] right-3 flex items-center"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
-                                {showConfirmPassword ? (
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                    </svg>
-                                ) : (
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                )}
+                                <EyeIcon show={showConfirmPassword} />
                             </button>
                         </div>
-                        {confirmPassword && password !== confirmPassword && (
-                            <p className="mt-1 text-sm text-red-600">Les mots de passe ne correspondent pas</p>
-                        )}
                     </div>
 
                     {/* Terms and conditions */}
@@ -298,13 +275,22 @@ const CreateAccountPage: React.FC = () => {
 
                     {/* Submit button */}
                     <div className="pt-4">
-                        <button
-                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        <Button
                             type="submit"
+                            variant="primary"
+                            size="lg"
+                            className="w-full"
                             disabled={loading || !!emailError || (passwordStrength ? !passwordStrength.is_valid : false)}
                         >
-                            {loading ? 'Création en cours...' : 'Créer mon compte'}
-                        </button>
+                            {loading ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <Loading size="sm" />
+                                    <span>Création en cours...</span>
+                                </div>
+                            ) : (
+                                'Créer mon compte'
+                            )}
+                        </Button>
                     </div>
                 </form>
 
@@ -322,7 +308,7 @@ const CreateAccountPage: React.FC = () => {
                         ← Retour à l'accueil
                     </Link>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };

@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import ImageUploader from '../components/ImageUploader';
 import Logo from '../components/Logo';
 import { api } from '../services/api';
+import { Button, Card, Input, Select, Modal, Badge, Loading } from '../components/ui';
 import 'leaflet/dist/leaflet.css';
 
 const Icon = ({ path, className = "w-5 h-5" }: { path: string; className?: string }) => (
@@ -41,17 +42,19 @@ const MultiSelect = ({
       </label>
       <div className="flex flex-wrap gap-2">
         {options.map(option => (
-          <button
+          <Button
             key={option.value}
             type="button"
             onClick={() => toggleOption(option.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${selected.includes(option.value)
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-purple-100 border border-gray-300'
+            variant={selected.includes(option.value) ? 'primary' : 'outline'}
+            size="sm"
+            className={`transition-all duration-200 ${selected.includes(option.value)
+                ? ''
+                : 'hover:bg-purple-100'
               }`}
           >
             {option.label}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -65,24 +68,33 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
   return (
     <div className="bg-gray-50 border-b border-gray-300 rounded-t-lg p-2 flex space-x-2">
-      <button
+      <Button
+        type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`p-1 rounded ${editor.isActive('bold') ? 'bg-purple-200' : ''}`}
+        variant={editor.isActive('bold') ? 'secondary' : 'ghost'}
+        size="sm"
+        className="px-2 py-1"
       >
         Bold
-      </button>
-      <button
+      </Button>
+      <Button
+        type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`p-1 rounded ${editor.isActive('italic') ? 'bg-purple-200' : ''}`}
+        variant={editor.isActive('italic') ? 'secondary' : 'ghost'}
+        size="sm"
+        className="px-2 py-1"
       >
         Italic
-      </button>
-      <button
+      </Button>
+      <Button
+        type="button"
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={`p-1 rounded ${editor.isActive('strike') ? 'bg-purple-200' : ''}`}
+        variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
+        size="sm"
+        className="px-2 py-1"
       >
         Strike
-      </button>
+      </Button>
     </div>
   );
 };
@@ -322,7 +334,7 @@ const EditProfilePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+      <Card className="max-w-2xl w-full p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
           {profileExists ? 'Modifier votre profil' : 'Créer votre profil'}
         </h1>
@@ -354,8 +366,7 @@ const EditProfilePage: React.FC = () => {
               Ville *
             </label>
             <div className="flex gap-2">
-              <input
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              <Input
                 id="city"
                 type="text"
                 placeholder="Ex: Paris, Lyon, Marseille..."
@@ -366,48 +377,43 @@ const EditProfilePage: React.FC = () => {
                   setCoordinates(null);
                 }}
                 required
+                className="flex-1"
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => setMapVisible(true)}
-                className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700"
+                variant="primary"
+                size="md"
+                className="p-2"
                 title="Sélectionner sur la carte"
               >
                 <Icon path={icons.mapPin} />
-              </button>
+              </Button>
             </div>
             {coordinates && (
-              <div className="mt-1 text-xs text-gray-500">
+              <Badge variant="secondary" className="mt-1 text-xs">
                 <Icon path={icons.location} className="w-3 h-3 inline mr-1" />
                 Coordonnées: [{coordinates[0].toFixed(4)}, {coordinates[1].toFixed(4)}]
-              </div>
+              </Badge>
             )}
           </div>
 
-
           {/* Map Modal */}
-          {isMapVisible && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-4 rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 h-3/4 relative">
-                <h3 className="text-lg font-bold mb-2">Cliquez sur la carte pour choisir un lieu</h3>
-                <div className="h-[calc(100%-40px)] w-full">
-                  <MapContainer center={[48.8566, 2.3522]} zoom={6} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <MapClickHandler />
-                  </MapContainer>
-                </div>
-                <button
-                  onClick={() => setMapVisible(false)}
-                  className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md"
-                >
-                  <Icon path={icons.close} className="w-6 h-6 text-gray-700" />
-                </button>
-              </div>
+          <Modal
+            isOpen={isMapVisible}
+            onClose={() => setMapVisible(false)}
+            title="Cliquez sur la carte pour choisir un lieu"
+          >
+            <div className="h-[500px] w-full">
+              <MapContainer center={[48.8566, 2.3522]} zoom={6} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapClickHandler />
+              </MapContainer>
             </div>
-          )}
+          </Modal>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photos">
@@ -442,64 +448,63 @@ const EditProfilePage: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="subject">
-              Matière enseignée
-            </label>
-            <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              id="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            >
-              {SCHOOL_SUBJECTS.map((subj) => (
-                <option key={subj.value} value={subj.value}>
-                  {subj.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            id="subject"
+            label="Matière enseignée"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            options={SCHOOL_SUBJECTS}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Description *
             </label>
-            <div className="tiptap-editor-wrapper border border-gray-300 rounded-lg">
+            <Card variant="bordered" className="overflow-hidden">
               <MenuBar editor={descriptionEditor} />
-              <EditorContent editor={descriptionEditor} className="p-3 min-h-[150px] bg-gray-50 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
-            </div>
+              <EditorContent editor={descriptionEditor} className="p-3 min-h-[150px] bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </Card>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Vos objectifs et aspirations (optionnel)
             </label>
-            <div className="tiptap-editor-wrapper border border-gray-300 rounded-lg">
+            <Card variant="bordered" className="overflow-hidden">
               <MenuBar editor={goalsEditor} />
-              <EditorContent editor={goalsEditor} className="p-3 min-h-[150px] bg-gray-50 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
-            </div>
+              <EditorContent editor={goalsEditor} className="p-3 min-h-[150px] bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </Card>
           </div>
 
           <div className="pt-4">
-            <button
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition duration-200 disabled:opacity-50"
+            <Button
               type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full"
               disabled={loading}
             >
-              {loading ? 'Enregistrement...' : (profileExists ? 'Enregistrer les modifications' : 'Créer le profil')}
-            </button>
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loading size="sm" />
+                  <span>Enregistrement...</span>
+                </div>
+              ) : (
+                profileExists ? 'Enregistrer les modifications' : 'Créer le profil'
+              )}
+            </Button>
           </div>
         </form>
 
         {city && !coordinates && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <Card variant="bordered" className="mt-4 p-3 bg-blue-50 border-blue-200">
             <p className="text-sm text-blue-700">
               <Icon path={icons.location} className="w-4 h-4 inline mr-1" />
               Les coordonnées GPS de "{city}" seront automatiquement déterminées lors de l'enregistrement.
             </p>
-          </div>
+          </Card>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

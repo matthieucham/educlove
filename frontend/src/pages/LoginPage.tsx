@@ -4,13 +4,14 @@ import { GoogleLogin } from '@react-oauth/google';
 import type { CredentialResponse } from '@react-oauth/google';
 import { useAuthStore } from '../store/authStore';
 import Logo from '../components/Logo';
+import { Button, Input, Card, Loading } from '../components/ui';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { loginWithGoogle, loginWithEmail, error, clearError } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isDevelopmentMode, setIsDevelopmentMode] = useState(true); // Toggle for dev mode
-  
+
   // Form state for development login
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,7 +54,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+      <Card className="max-w-md w-full p-8">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4 p-4">
@@ -72,12 +73,13 @@ const LoginPage = () => {
 
         {/* Development Mode Toggle */}
         <div className="mb-4 flex items-center justify-center">
-          <button
+          <Button
+            variant="ghost"
             onClick={() => setIsDevelopmentMode(!isDevelopmentMode)}
-            className="text-sm text-purple-600 hover:text-purple-700 underline"
+            className="text-sm text-purple-600 hover:text-purple-700"
           >
             {isDevelopmentMode ? 'Utiliser Google OAuth' : 'Mode développement'}
-          </button>
+          </Button>
         </div>
 
         {/* Authentication Options */}
@@ -86,84 +88,79 @@ const LoginPage = () => {
             // Development Mode Login
             <>
               <form onSubmit={handleDevLogin} className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="marie.dupont@educnat.gouv.fr"
-                    required
-                  />
-                </div>
+                <Input
+                  type="email"
+                  id="email"
+                  label="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="marie.dupont@educnat.gouv.fr"
+                  required
+                />
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Mot de passe
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
+                <Input
+                  type="password"
+                  id="password"
+                  label="Mot de passe"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
 
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
+                  size="lg"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition duration-200 disabled:opacity-50"
+                  className="w-full"
                 >
                   {isLoading ? 'Connexion...' : 'Se connecter'}
-                </button>
+                </Button>
               </form>
 
               {/* Test Accounts Info */}
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <Card variant="bordered" className="mt-4 p-4 bg-blue-50">
                 <p className="text-sm font-semibold text-blue-900 mb-2">Comptes de test:</p>
                 <div className="text-xs text-blue-700 space-y-1">
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       setEmail('marie.dupont@educnat.gouv.fr');
                       setPassword('password123');
                     }}
-                    className="block w-full text-left hover:text-blue-900 hover:underline"
+                    className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
                   >
                     • marie.dupont@educnat.gouv.fr / password123
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       setEmail('jean.martin@educnat.gouv.fr');
                       setPassword('password123');
                     }}
-                    className="block w-full text-left hover:text-blue-900 hover:underline"
+                    className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
                   >
                     • jean.martin@educnat.gouv.fr / password123
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       setEmail('sophie.bernard@educnat.gouv.fr');
                       setPassword('password123');
                     }}
-                    className="block w-full text-left hover:text-blue-900 hover:underline"
+                    className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
                   >
                     • sophie.bernard@educnat.gouv.fr / password123
-                  </button>
+                  </Button>
                 </div>
                 <p className="text-xs text-blue-600 mt-2">
                   Ou utilisez n'importe quel email - un compte sera créé automatiquement
                 </p>
-              </div>
+              </Card>
             </>
           ) : (
             // Google OAuth Login
@@ -183,7 +180,7 @@ const LoginPage = () => {
 
               {isLoading && (
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                  <Loading size="md" />
                   <p className="mt-2 text-sm text-gray-600">Connexion en cours...</p>
                 </div>
               )}
@@ -209,7 +206,7 @@ const LoginPage = () => {
             ← Retour à l'accueil
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

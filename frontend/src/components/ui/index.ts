@@ -8,6 +8,7 @@ export type { SelectOption } from './Select'
 export { default as Badge, Chip } from './Badge'
 export { default as Avatar, AvatarGroup } from './Avatar'
 export { default as Loading, Spinner, LoadingOverlay, Skeleton, LoadingDots, ProgressBar } from './Loading'
+export { default as MapPicker } from './MapPicker'
 
 // Re-export utility functions
 export { cn } from '../../lib/utils'

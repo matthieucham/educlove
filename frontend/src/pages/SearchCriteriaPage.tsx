@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { MapPicker } from '../components/ui';
 import { api } from '../services/api';
-import 'leaflet/dist/leaflet.css';
 
 // A helper component for the icons to keep the main component cleaner.
 const Icon = ({ path, className = "w-5 h-5" }: { path: string; className?: string }) => (
@@ -61,12 +60,10 @@ const SearchCriteriaPage: React.FC = () => {
   const searchCriteria = location.state?.searchCriteria;
 
   // Initialize state with user's saved search criteria if available
-  const [locations, setLocations] = useState<string[]>(
-    searchCriteria?.location ? [searchCriteria.location] : ['']
+  const [locations, setLocations] = useState<Array<{ city: string; coordinates: [number, number] | null }>>(
+    searchCriteria?.location ? [{ city: searchCriteria.location, coordinates: null }] : [{ city: '', coordinates: null }]
   );
   const [radii, setRadii] = useState<number[]>([25]);
-  const [isMapVisible, setMapVisible] = useState(false);
-  const [activeLocationIndex, setActiveLocationIndex] = useState(0);
   const [minAge, setMinAge] = useState<string>('');
   const [maxAge, setMaxAge] = useState<string>('');
   const [selectedGender, setSelectedGender] = useState<string[]>([]);
@@ -102,7 +99,10 @@ const SearchCriteriaPage: React.FC = () => {
             setMaxAge(savedCriteria.age_max.toString());
           }
           if (savedCriteria.locations && savedCriteria.locations.length > 0) {
-            setLocations(savedCriteria.locations.map((loc: any) => loc.city_name || ''));
+            setLocations(savedCriteria.locations.map((loc: any) => ({
+              city: loc.city_name || '',
+              coordinates: loc.coordinates || null
+            })));
           }
           if (savedCriteria.radii && savedCriteria.radii.length > 0) {
             setRadii(savedCriteria.radii);
@@ -120,8 +120,8 @@ const SearchCriteriaPage: React.FC = () => {
   useEffect(() => {
     if (userProfile) {
       // Set location from profile if available
-      if (userProfile.location && locations[0] === '') {
-        setLocations([userProfile.location]);
+      if (userProfile.location && locations[0].city === '') {
+        setLocations([{ city: userProfile.location, coordinates: null }]);
       }
 
       // Set looking for preference
@@ -140,42 +140,12 @@ const SearchCriteriaPage: React.FC = () => {
   }, [userProfile]);
 
   const icons = {
-    region: "M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z",
-    gender: "M9 6a3 3 0 11-6 0 3 3 0 016 0zm-1.518 5.5A5.002 5.002 0 011 15a.5.5 0 01-1 0 6 6 0 0111.22-3.995.5.5 0 01-.59.814zM16 8a3 3 0 11-6 0 3 3 0 016 0zm-1.518 5.5A5.002 5.002 0 0111 15a.5.5 0 01-1 0 6 6 0 0111.22-3.995.5.5 0 01-.59.814z",
-    age: "M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z",
-    subject: "M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z",
-    lookingFor: "M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z",
-    orientation: "M10 18a8 8 0 100-16 8 8 0 000 16zM9 9a1 1 0 112 0v4a1 1 0 11-2 0V9z",
     close: "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-  };
-
-  const MapClickHandler = () => {
-    useMapEvents({
-      click: async (e) => {
-        const { lat, lng } = e.latlng;
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
-          const data = await response.json();
-          const city = data.address.city || data.address.town || data.address.village || 'Lieu inconnu';
-          const newLocations = [...locations];
-          newLocations[activeLocationIndex] = city;
-          setLocations(newLocations);
-        } catch (error) {
-          console.error("Error fetching city name:", error);
-          const newLocations = [...locations];
-          newLocations[activeLocationIndex] = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-          setLocations(newLocations);
-        } finally {
-          setMapVisible(false);
-        }
-      },
-    });
-    return null;
   };
 
   const handleAddLocation = () => {
     if (locations.length < 3) {
-      setLocations([...locations, '']);
+      setLocations([...locations, { city: '', coordinates: null }]);
       setRadii([...radii, 25]);
     }
   };
@@ -264,52 +234,45 @@ const SearchCriteriaPage: React.FC = () => {
               Sa localisation
             </label>
             {locations.map((location, index) => (
-              <div key={index} className="flex items-center mb-2 space-x-2">
-                <input
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  value={location}
-                  onChange={(e) => {
-                    const newLocations = [...locations];
-                    newLocations[index] = e.target.value;
-                    setLocations(newLocations);
-                  }}
-                  type="text"
-                  placeholder="Entrez une ville ou cliquez sur la carte"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveLocationIndex(index);
-                    setMapVisible(true);
-                  }}
-                  className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700"
-                >
-                  <Icon path={icons.region} />
-                </button>
-                <select
-                  value={radii[index]}
-                  onChange={(e) => {
-                    const newRadii = [...radii];
-                    newRadii[index] = Number(e.target.value);
-                    setRadii(newRadii);
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value={0}>0 km</option>
-                  <option value={5}>5 km</option>
-                  <option value={10}>10 km</option>
-                  <option value={25}>25 km</option>
-                  <option value={50}>50 km</option>
-                </select>
-                {locations.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveLocation(index)}
-                    className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              <div key={index} className="mb-2">
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1">
+                    <MapPicker
+                      value={location.city}
+                      coordinates={location.coordinates}
+                      onChange={(city, coords) => {
+                        const newLocations = [...locations];
+                        newLocations[index] = { city, coordinates: coords };
+                        setLocations(newLocations);
+                      }}
+                      placeholder="Entrez une ville ou cliquez sur la carte"
+                    />
+                  </div>
+                  <select
+                    value={radii[index]}
+                    onChange={(e) => {
+                      const newRadii = [...radii];
+                      newRadii[index] = Number(e.target.value);
+                      setRadii(newRadii);
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
-                    <Icon path={icons.close} />
-                  </button>
-                )}
+                    <option value={0}>0 km</option>
+                    <option value={5}>5 km</option>
+                    <option value={10}>10 km</option>
+                    <option value={25}>25 km</option>
+                    <option value={50}>50 km</option>
+                  </select>
+                  {locations.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveLocation(index)}
+                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                    >
+                      <Icon path={icons.close} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
             {locations.length < 3 && (
@@ -320,26 +283,6 @@ const SearchCriteriaPage: React.FC = () => {
               >
                 + Ajouter une localisation
               </button>
-            )}
-
-            {isMapVisible && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                <div className="bg-white p-4 rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 h-3/4 relative">
-                  <h3 className="text-lg font-bold mb-2">Cliquez sur la carte pour choisir un lieu</h3>
-                  <div className="h-[calc(100%-40px)] w-full">
-                    <MapContainer center={[48.8566, 2.3522]} zoom={6} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                      <MapClickHandler />
-                    </MapContainer>
-                  </div>
-                  <button onClick={() => setMapVisible(false)} className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md">
-                    <Icon path={icons.close} className="w-6 h-6 text-gray-700" />
-                  </button>
-                </div>
-              </div>
             )}
           </div>
 
@@ -352,15 +295,14 @@ const SearchCriteriaPage: React.FC = () => {
                   // Prepare search criteria data
                   const searchCriteriaData = {
                     locations: locations
-                      .filter(loc => loc !== '')
-                      .map((loc, index) => {
-                        // Send city name with [0, 0] coordinates to trigger geocoding in backend
+                      .filter(loc => loc.city !== '')
+                      .map((loc) => {
                         return {
-                          city_name: loc,
-                          coordinates: [0, 0] // Backend will geocode this automatically
+                          city_name: loc.city,
+                          coordinates: loc.coordinates || [0, 0] // Backend will geocode if [0, 0]
                         };
                       }),
-                    radii: radii.slice(0, locations.filter(loc => loc !== '').length),
+                    radii: radii.slice(0, locations.filter(loc => loc.city !== '').length),
                     age_min: minAge ? parseInt(minAge) : undefined,
                     age_max: maxAge ? parseInt(maxAge) : undefined,
                     gender: selectedGender,

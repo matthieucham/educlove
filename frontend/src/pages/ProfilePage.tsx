@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { Button, Card } from '../components/ui';
 
 const ProfilePage: React.FC = () => {
   const { profileId } = useParams<{ profileId: string }>();
@@ -36,7 +37,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-2xl w-full">
+      <Card className="max-w-2xl w-full overflow-hidden p-0">
         <img
           src={profile.picture}
           alt={profile.firstName}
@@ -45,14 +46,16 @@ const ProfilePage: React.FC = () => {
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-800">{profile.firstName}</h1>
           <p className="text-gray-600 mt-4">{profile.bio}</p>
-          <button
+          <Button
             onClick={handleMatch}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-pink-700 transition duration-200 mt-6"
+            variant="primary"
+            size="lg"
+            className="mt-6"
           >
             Envoyer un Match
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
