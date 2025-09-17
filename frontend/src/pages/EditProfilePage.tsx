@@ -3,7 +3,6 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
-import ImageUploader from '../components/ImageUploader';
 import Logo from '../components/Logo';
 import { api } from '../services/api';
 import { Button, Card, Input, Select, Modal, Badge, Loading } from '../components/ui';
@@ -139,7 +138,6 @@ const EditProfilePage: React.FC = () => {
   const [lookingFor, setLookingFor] = useState<string[]>([]);
   const [lookingForGender, setLookingForGender] = useState<string[]>([]);
   const [subject, setSubject] = useState('');
-  const [photos, setPhotos] = useState<string[]>([]);
   const [profileExists, setProfileExists] = useState(false);
   const [isMapVisible, setMapVisible] = useState(false);
 
@@ -149,7 +147,6 @@ const EditProfilePage: React.FC = () => {
     city: "M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z",
     lookingFor: "M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z",
     subject: "M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z",
-    photo: "M4 4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm12 2a1 1 0 100-2 1 1 0 000 2zM4 12a1 1 0 100 2h12a1 1 0 100-2H4z",
     description: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
     goals: "M9 19v-6l-2 2-2-2v6h4zM21 12a9 9 0 11-18 0 9 9 0 0118 0z",
     location: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
@@ -216,7 +213,6 @@ const EditProfilePage: React.FC = () => {
         // Set looking_for_gender if it exists
         setLookingForGender(profile.looking_for_gender || []);
         setSubject(profile.subject || '');
-        setPhotos(profile.photos || []);
 
         // Set editor content
         if (descriptionEditor && profile.description) {
@@ -263,7 +259,6 @@ const EditProfilePage: React.FC = () => {
         looking_for: lookingFor,
         looking_for_gender: lookingForGender,
         subject: subject || 'Non spécifié', // Optional field
-        photos: photos,
         description: descriptionEditor?.getHTML() || '',
         goals: goalsEditor?.getHTML() || '', // Optional field
         email: 'user@example.com' // Will be filled from user data in backend
@@ -405,14 +400,6 @@ const EditProfilePage: React.FC = () => {
               </MapContainer>
             </div>
           </Modal>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photos">
-              Vos photos (jusqu'à 8)
-            </label>
-            <ImageUploader />
-            <p className="text-xs text-gray-500 mt-1">La première photo sera votre photo de profil.</p>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MultiSelect

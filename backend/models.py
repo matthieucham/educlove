@@ -64,7 +64,6 @@ class ProfileBase(BaseModel):
         ..., description="Gender preferences (MALE, FEMALE, OTHER)"
     )
     subject: str = Field(..., min_length=1, max_length=100)
-    photos: List[str] = []
     description: Optional[str] = Field(None, max_length=5000)
     goals: Optional[str] = Field(None, max_length=5000)
     email: EmailStr
@@ -94,7 +93,6 @@ class Profile(ProfileBase):
                 "looking_for_gender": ["MALE", "FEMALE"],
                 "subject": "Mathématiques",
                 "experience_years": 5,
-                "photos": ["http://example.com/photo1.jpg"],
                 "description": "A passionate math teacher looking for a serious relationship.",
                 "goals": "My goal is to inspire students and find a life partner.",
                 "email": "jane.doe@example.com",
@@ -115,7 +113,6 @@ class ProfileUpdate(ProfileBase):
                 "looking_for": ["Amitié", "Relation sérieuse"],
                 "looking_for_gender": ["MALE", "FEMALE"],
                 "subject": "Mathématiques",
-                "photos": ["http://example.com/photo1.jpg"],
                 "description": "A passionate math teacher looking for a serious relationship.",
                 "goals": "My goal is to inspire students and find a life partner.",
                 "email": "jane.doe@example.com",

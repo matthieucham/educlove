@@ -25,7 +25,6 @@ const CompleteProfilePage: React.FC = () => {
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [lookingFor, setLookingFor] = useState<string[]>([]);
   const [lookingForGender, setLookingForGender] = useState<string[]>([]);
-  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -56,8 +55,7 @@ const CompleteProfilePage: React.FC = () => {
     user: "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z",
     calendar: "M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z",
     gender: "M12 2a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V4a2 2 0 012-2h4zm0 2H8v6h4V4zm4 8a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2a2 2 0 012-2h2z",
-    lookingFor: "M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z",
-    photo: "M4 4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm12 2a1 1 0 100-2 1 1 0 000 2zM4 12a1 1 0 100 2h12a1 1 0 100-2H4z"
+    lookingFor: "M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
   };
 
   useEffect(() => {
@@ -80,7 +78,7 @@ const CompleteProfilePage: React.FC = () => {
     setLoading(true);
 
     // Validate required fields
-    if (!firstName || !birthDay || !birthMonth || !birthYear || !gender || !city || !profilePhoto) {
+    if (!firstName || !birthDay || !birthMonth || !birthYear || !gender || !city) {
       setError('Veuillez remplir tous les champs obligatoires');
       setLoading(false);
       return;
@@ -101,7 +99,6 @@ const CompleteProfilePage: React.FC = () => {
         looking_for: [],// This will need to be added to the form
         looking_for_gender: [],// This will need to be added to the form
         subject: 'À définir', // This will need to be added to the form
-        photos: [], // Handle photo upload separately
         description: '',
         goals: '',
         email: user?.email || ''
@@ -243,21 +240,6 @@ const CompleteProfilePage: React.FC = () => {
                 setCoordinates(newCoords);
               }}
               placeholder="Ex: Paris, Lyon, Marseille..."
-            />
-          </div>
-
-          {/* Photo de profil */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
-              Photo de profil
-            </label>
-            <input
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-              id="photo"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setProfilePhoto(e.target.files?.[0] || null)}
-              required
             />
           </div>
 

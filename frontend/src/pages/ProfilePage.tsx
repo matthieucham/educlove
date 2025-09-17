@@ -11,9 +11,11 @@ const ProfilePage: React.FC = () => {
   const profile = {
     id: parseInt(profileId || '0', 10),
     firstName: 'Alice',
-    picture: 'https://via.placeholder.com/300',
     bio: 'I am a passionate teacher who loves hiking and reading.',
   };
+
+  // Placeholder background image - using a gradient as placeholder
+  const placeholderBackground = 'https://via.placeholder.com/800x400/9333ea/ec4899?text=';
 
   const handleMatch = () => {
     // For now, just navigate to the chats page
@@ -38,14 +40,23 @@ const ProfilePage: React.FC = () => {
       </div>
 
       <Card className="max-w-2xl w-full overflow-hidden p-0">
-        <img
-          src={profile.picture}
-          alt={profile.firstName}
-          className="w-full h-96 object-cover"
-        />
+        <div
+          className="w-full h-96 bg-gradient-to-br from-purple-400 via-pink-400 to-purple-500 flex items-center justify-center"
+          style={{
+            backgroundImage: `linear-gradient(135deg, rgba(147, 51, 234, 0.8), rgba(236, 72, 153, 0.8)), url('${placeholderBackground}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="text-white text-center">
+            <div className="w-32 h-32 mx-auto mb-4 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+              <span className="text-5xl font-bold">{profile.firstName.charAt(0)}</span>
+            </div>
+            <h2 className="text-3xl font-bold">{profile.firstName}</h2>
+          </div>
+        </div>
         <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800">{profile.firstName}</h1>
-          <p className="text-gray-600 mt-4">{profile.bio}</p>
+          <p className="text-gray-600 mt-2">{profile.bio}</p>
           <Button
             onClick={handleMatch}
             variant="primary"

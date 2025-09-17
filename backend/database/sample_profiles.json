@@ -19,9 +19,6 @@
     ],
     "subject": "Mathématiques",
     "experience_years": 5,
-    "photos": [
-      "https://example.com/photo1.jpg"
-    ],
     "description": "Passionnée par l'enseignement des mathématiques, je cherche à rencontrer quelqu'un qui partage mes valeurs.",
     "goals": "Transmettre ma passion pour les mathématiques et construire une relation durable.",
     "email": "marie.dupont@example.com"
@@ -45,9 +42,6 @@
     ],
     "subject": "Histoire",
     "experience_years": 8,
-    "photos": [
-      "https://example.com/photo2.jpg"
-    ],
     "description": "Professeur d'histoire passionné, j'aime partager mes connaissances et découvrir de nouvelles perspectives.",
     "goals": "Trouver quelqu'un avec qui partager ma passion pour l'histoire et la culture.",
     "email": "thomas.martin@example.com"
@@ -73,9 +67,6 @@
     ],
     "subject": "Anglais",
     "experience_years": 3,
-    "photos": [
-      "https://example.com/photo3.jpg"
-    ],
     "description": "Jeune professeure d'anglais, j'adore voyager et découvrir de nouvelles cultures.",
     "goals": "Rencontrer des personnes ouvertes d'esprit pour partager des moments agréables.",
     "email": "sophie.bernard@example.com"
@@ -99,9 +90,6 @@
     ],
     "subject": "Physique",
     "experience_years": 10,
-    "photos": [
-      "https://example.com/photo4.jpg"
-    ],
     "description": "Physicien et enseignant, je recherche une relation stable avec quelqu'un de curieux et intelligent.",
     "goals": "Construire une famille avec quelqu'un qui partage ma passion pour les sciences.",
     "email": "pierre.dubois@example.com"
@@ -126,9 +114,6 @@
     ],
     "subject": "Biologie",
     "experience_years": 6,
-    "photos": [
-      "https://example.com/photo5.jpg"
-    ],
     "description": "Professeure de biologie, j'aime la nature et les activités en plein air.",
     "goals": "Élargir mon cercle social et rencontrer des personnes partageant mes intérêts.",
     "email": "julie.moreau@example.com"
@@ -153,9 +138,6 @@
     ],
     "subject": "Informatique",
     "experience_years": 7,
-    "photos": [
-      "https://example.com/photo6.jpg"
-    ],
     "description": "Enseignant en informatique, passionné par les nouvelles technologies et l'innovation.",
     "goals": "Rencontrer quelqu'un pour partager des projets et peut-être plus.",
     "email": "alexandre.leroy@example.com"
@@ -179,9 +161,6 @@
     ],
     "subject": "Français",
     "experience_years": 4,
-    "photos": [
-      "https://example.com/photo7.jpg"
-    ],
     "description": "Professeure de français, amoureuse de la littérature et de la poésie.",
     "goals": "Trouver l'amour avec quelqu'un qui apprécie la beauté des mots.",
     "email": "emma.petit@example.com"
@@ -206,9 +185,6 @@
     ],
     "subject": "Éducation physique",
     "experience_years": 6,
-    "photos": [
-      "https://example.com/photo8.jpg"
-    ],
     "description": "Prof de sport dynamique, j'aime les défis et les activités en groupe.",
     "goals": "Rencontrer des personnes actives pour partager des moments sportifs et fun.",
     "email": "lucas.robert@example.com"
@@ -232,9 +208,6 @@
     ],
     "subject": "Chimie",
     "experience_years": 9,
-    "photos": [
-      "https://example.com/photo9.jpg"
-    ],
     "description": "Professeure de chimie, je cherche quelqu'un de stable et mature pour une relation durable.",
     "goals": "Construire une relation solide basée sur la confiance et le respect mutuel.",
     "email": "camille.richard@example.com"
@@ -259,9 +232,6 @@
     ],
     "subject": "Géographie",
     "experience_years": 5,
-    "photos": [
-      "https://example.com/photo10.jpg"
-    ],
     "description": "Passionné de géographie et de voyages, je cherche quelqu'un pour explorer le monde.",
     "goals": "Partager ma passion pour la découverte avec quelqu'un de spécial.",
     "email": "maxime.garcia@example.com"
