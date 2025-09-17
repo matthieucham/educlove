@@ -1,40 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
-import type { CredentialResponse } from '@react-oauth/google';
 import { useAuthStore } from '../store/authStore';
 import Logo from '../components/Logo';
-import { Button, Input, Card, Loading } from '../components/ui';
+import { Button, Input, Card } from '../components/ui';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { loginWithGoogle, loginWithEmail, error, clearError } = useAuthStore();
+  const { loginWithEmail, error, clearError } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [isDevelopmentMode, setIsDevelopmentMode] = useState(true); // Toggle for dev mode
 
-  // Form state for development login
+  // Form state for login
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
-    if (credentialResponse.credential) {
-      setIsLoading(true);
-      try {
-        await loginWithGoogle(credentialResponse.credential);
-        navigate('/dashboard');
-      } catch (err) {
-        console.error('Login failed:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleGoogleError = () => {
-    console.error('Google login failed');
-  };
-
-  const handleDevLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
@@ -71,124 +50,83 @@ const LoginPage = () => {
           </div>
         )}
 
-        {/* Development Mode Toggle */}
-        <div className="mb-4 flex items-center justify-center">
-          <Button
-            variant="ghost"
-            onClick={() => setIsDevelopmentMode(!isDevelopmentMode)}
-            className="text-sm text-purple-600 hover:text-purple-700"
-          >
-            {isDevelopmentMode ? 'Utiliser Google OAuth' : 'Mode développement'}
-          </Button>
-        </div>
-
-        {/* Authentication Options */}
+        {/* Login Form */}
         <div className="space-y-4">
-          {isDevelopmentMode ? (
-            // Development Mode Login
-            <>
-              <form onSubmit={handleDevLogin} className="space-y-4">
-                <Input
-                  type="email"
-                  id="email"
-                  label="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="marie.dupont@educnat.gouv.fr"
-                  required
-                />
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Input
+              type="email"
+              id="email"
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="marie.dupont@educnat.gouv.fr"
+              required
+            />
 
-                <Input
-                  type="password"
-                  id="password"
-                  label="Mot de passe"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
+            <Input
+              type="password"
+              id="password"
+              label="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
 
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? 'Connexion...' : 'Se connecter'}
+            </Button>
+          </form>
+
+          {/* Test Accounts Info - Only for local development */}
+          {import.meta.env.DEV && (
+            <Card variant="bordered" className="mt-4 p-4 bg-blue-50">
+              <p className="text-sm font-semibold text-blue-900 mb-2">Comptes de test (développement local):</p>
+              <div className="text-xs text-blue-700 space-y-1">
                 <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  disabled={isLoading}
-                  className="w-full"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEmail('marie.dupont@educnat.gouv.fr');
+                    setPassword('password123');
+                  }}
+                  className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
                 >
-                  {isLoading ? 'Connexion...' : 'Se connecter'}
+                  • marie.dupont@educnat.gouv.fr / password123
                 </Button>
-              </form>
-
-              {/* Test Accounts Info */}
-              <Card variant="bordered" className="mt-4 p-4 bg-blue-50">
-                <p className="text-sm font-semibold text-blue-900 mb-2">Comptes de test:</p>
-                <div className="text-xs text-blue-700 space-y-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEmail('marie.dupont@educnat.gouv.fr');
-                      setPassword('password123');
-                    }}
-                    className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
-                  >
-                    • marie.dupont@educnat.gouv.fr / password123
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEmail('jean.martin@educnat.gouv.fr');
-                      setPassword('password123');
-                    }}
-                    className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
-                  >
-                    • jean.martin@educnat.gouv.fr / password123
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEmail('sophie.bernard@educnat.gouv.fr');
-                      setPassword('password123');
-                    }}
-                    className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
-                  >
-                    • sophie.bernard@educnat.gouv.fr / password123
-                  </Button>
-                </div>
-                <p className="text-xs text-blue-600 mt-2">
-                  Ou utilisez n'importe quel email - un compte sera créé automatiquement
-                </p>
-              </Card>
-            </>
-          ) : (
-            // Google OAuth Login
-            <>
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  text="signin_with"
-                  shape="rectangular"
-                  size="large"
-                  theme="outline"
-                  width="100%"
-                  locale="fr"
-                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEmail('jean.martin@educnat.gouv.fr');
+                    setPassword('password123');
+                  }}
+                  className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
+                >
+                  • jean.martin@educnat.gouv.fr / password123
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEmail('sophie.bernard@educnat.gouv.fr');
+                    setPassword('password123');
+                  }}
+                  className="block w-full text-left text-xs p-0 h-auto justify-start hover:text-blue-900 hover:underline"
+                >
+                  • sophie.bernard@educnat.gouv.fr / password123
+                </Button>
               </div>
-
-              {isLoading && (
-                <div className="text-center">
-                  <Loading size="md" />
-                  <p className="mt-2 text-sm text-gray-600">Connexion en cours...</p>
-                </div>
-              )}
-
-              <p className="text-center text-sm text-gray-600 mt-4">
-                Nécessite une configuration Google OAuth
+              <p className="text-xs text-blue-600 mt-2">
+                Ou utilisez n'importe quel email - un compte sera créé automatiquement
               </p>
-            </>
+            </Card>
           )}
         </div>
 

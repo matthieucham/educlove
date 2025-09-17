@@ -18,16 +18,21 @@ const MultiSelect = ({
   onSelectionChange
 }: {
   label: string;
-  options: string[];
+  options: Array<{ value: string; label: string }> | string[];
   selected?: string[];
   onSelectionChange: (selected: string[]) => void;
 }) => {
-  const toggleOption = (option: string) => {
-    const newSelection = selected.includes(option)
-      ? selected.filter(item => item !== option)
-      : [...selected, option];
+  const toggleOption = (value: string) => {
+    const newSelection = selected.includes(value)
+      ? selected.filter(item => item !== value)
+      : [...selected, value];
     onSelectionChange(newSelection);
   };
+
+  // Handle both string[] and {value, label}[] formats
+  const normalizedOptions = options.map(opt =>
+    typeof opt === 'string' ? { value: opt, label: opt } : opt
+  );
 
   return (
     <div>
@@ -35,17 +40,17 @@ const MultiSelect = ({
         {label}
       </label>
       <div className="flex flex-wrap gap-2">
-        {options.map(option => (
+        {normalizedOptions.map(option => (
           <button
-            key={option}
+            key={option.value}
             type="button"
-            onClick={() => toggleOption(option)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${selected.includes(option)
+            onClick={() => toggleOption(option.value)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${selected.includes(option.value)
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-purple-100 border border-gray-300'
               }`}
           >
-            {option}
+            {option.label}
           </button>
         ))}
       </div>
@@ -66,13 +71,6 @@ const SearchCriteriaPage: React.FC = () => {
   const [radii, setRadii] = useState<number[]>([25]);
   const [minAge, setMinAge] = useState<string>('');
   const [maxAge, setMaxAge] = useState<string>('');
-  const [selectedGender, setSelectedGender] = useState<string[]>([]);
-  const [selectedOrientation, setSelectedOrientation] = useState<string[]>(
-    userProfile?.sexualOrientation ? [userProfile.sexualOrientation] : []
-  );
-  const [selectedLookingFor, setSelectedLookingFor] = useState<string[]>(
-    searchCriteria?.lookingFor ? [searchCriteria.lookingFor] : []
-  );
 
   // Load saved search criteria from backend
   useEffect(() => {
@@ -83,15 +81,6 @@ const SearchCriteriaPage: React.FC = () => {
           const savedCriteria = response.data.criteria;
 
           // Set all the form fields from saved criteria
-          if (savedCriteria.gender) {
-            setSelectedGender(savedCriteria.gender);
-          }
-          if (savedCriteria.orientation) {
-            setSelectedOrientation(savedCriteria.orientation);
-          }
-          if (savedCriteria.looking_for) {
-            setSelectedLookingFor(savedCriteria.looking_for);
-          }
           if (savedCriteria.age_min !== null && savedCriteria.age_min !== undefined) {
             setMinAge(savedCriteria.age_min.toString());
           }
@@ -124,18 +113,6 @@ const SearchCriteriaPage: React.FC = () => {
         setLocations([{ city: userProfile.location, coordinates: null }]);
       }
 
-      // Set looking for preference
-      if (userProfile.lookingFor) {
-        const lookingForMap: { [key: string]: string } = {
-          'friendship': 'Amitié',
-          'casual': 'Relation légère',
-          'serious': 'Relation sérieuse'
-        };
-        const frenchLookingFor = lookingForMap[userProfile.lookingFor];
-        if (frenchLookingFor && !selectedLookingFor.includes(frenchLookingFor)) {
-          setSelectedLookingFor([frenchLookingFor]);
-        }
-      }
     }
   }, [userProfile]);
 
@@ -182,20 +159,6 @@ const SearchCriteriaPage: React.FC = () => {
               </p>
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <MultiSelect
-              label="Je recherche..."
-              options={['Homme', 'Femme', 'Autre']}
-              selected={selectedGender}
-              onSelectionChange={setSelectedGender}
-            />
-            <MultiSelect
-              label="Orientation sexuelle"
-              options={['Hétérosexuel(le)', 'Homosexuel(le)', 'Bisexuel(le)', 'Autre']}
-              selected={selectedOrientation}
-              onSelectionChange={setSelectedOrientation}
-            />
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="ageRange">
@@ -221,13 +184,6 @@ const SearchCriteriaPage: React.FC = () => {
               />
             </div>
           </div>
-
-          <MultiSelect
-            label="Sa recherche"
-            options={['Amitié', 'Relation légère', 'Relation sérieuse']}
-            selected={selectedLookingFor}
-            onSelectionChange={setSelectedLookingFor}
-          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -305,9 +261,6 @@ const SearchCriteriaPage: React.FC = () => {
                     radii: radii.slice(0, locations.filter(loc => loc.city !== '').length),
                     age_min: minAge ? parseInt(minAge) : undefined,
                     age_max: maxAge ? parseInt(maxAge) : undefined,
-                    gender: selectedGender,
-                    orientation: selectedOrientation,
-                    looking_for: selectedLookingFor,
                   };
 
                   // Remove undefined values

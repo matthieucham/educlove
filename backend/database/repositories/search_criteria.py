@@ -70,9 +70,12 @@ class SearchCriteriaRepository:
         result = self.collection.delete_one({"user_id": user_id})
         return result.deleted_count > 0
 
-    def build_profile_query(self, criteria: Dict[str, Any]) -> Dict[str, Any]:
+    def build_profile_query(
+        self, criteria: Dict[str, Any], user_profile: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
         """
         Build a MongoDB query for profiles based on search criteria.
+        Now uses the user's profile values for gender and looking_for preferences.
         """
         query = {}
 
@@ -82,17 +85,13 @@ class SearchCriteriaRepository:
         if criteria.get("age_max") is not None:
             query.setdefault("age", {})["$lte"] = criteria["age_max"]
 
-        # Gender filter - pass it directly to the query
-        if criteria.get("gender"):
-            query["gender"] = criteria["gender"]
+        # Use user's looking_for_gender preference from their profile to filter by gender
+        if user_profile and user_profile.get("looking_for_gender"):
+            query["gender"] = {"$in": user_profile["looking_for_gender"]}
 
-        # Orientation filter
-        if criteria.get("orientation"):
-            query["orientation"] = criteria["orientation"]
-
-        # Looking for filter
-        if criteria.get("looking_for"):
-            query["looking_for"] = {"$in": criteria["looking_for"]}
+        # Use user's looking_for preference from their profile
+        if user_profile and user_profile.get("looking_for"):
+            query["looking_for"] = {"$elemMatch": {"$in": user_profile["looking_for"]}}
 
         # Subject filter
         if criteria.get("subjects"):

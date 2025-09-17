@@ -55,14 +55,25 @@ class MongoDatabase(Database):
 
     def search_profiles_with_user_criteria(self, user_id: str) -> List[Dict[str, Any]]:
         """Search profiles using the user's saved search criteria."""
+        # Get the current user's profile to pass their preferences
+        user = self.get_user_by_id(user_id)
+        current_user_profile = None
+        if user and user.get("profile_id"):
+            current_user_profile = self.get_profile(user["profile_id"])
+
         criteria = self.search_criteria_repo.get_search_criteria(user_id)
         if not criteria:
-            # If no criteria saved, return all profiles
-            return self.profiles_repo.get_all_profiles()
+            # If no criteria saved, still use user's profile preferences
+            if current_user_profile:
+                # Create minimal criteria with just the user's profile preferences
+                return self.profiles_repo.search_profiles({}, current_user_profile)
+            else:
+                # No criteria and no profile, return all profiles
+                return self.profiles_repo.get_all_profiles()
 
-        # Pass the raw criteria to search_profiles
-        # The search_profiles method will build its own safe query
-        return self.profiles_repo.search_profiles(criteria)
+        # Pass the raw criteria and current user's profile to search_profiles
+        # The search_profiles method will use the profile for gender and looking_for preferences
+        return self.profiles_repo.search_profiles(criteria, current_user_profile)
 
     # User methods - delegate to UsersRepository
     def upsert_user(self, user_data: Dict[str, Any]) -> str:

@@ -1,7 +1,8 @@
 [
   {
-    "first_name": "Alice",
-    "age": 28,
+    "first_name": "Marie",
+    "date_of_birth": "1996-03-15",
+    "gender": "FEMALE",
     "location": {
       "city_name": "Paris",
       "coordinates": [
@@ -9,17 +10,26 @@
         48.8566
       ]
     },
-    "looking_for": "Relation sérieuse",
-    "subject": "Physique",
-    "experience_years": 6,
-    "photos": [],
-    "description": "Professeur de physique passionnée, j'aime explorer de nouveaux concepts et voyager.",
-    "goals": "Trouver un partenaire pour partager des aventures et des discussions intellectuelles.",
-    "email": "alice.martin@example.com"
+    "looking_for": [
+      "FRIENDSHIP",
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "MALE"
+    ],
+    "subject": "Mathématiques",
+    "experience_years": 5,
+    "photos": [
+      "https://example.com/photo1.jpg"
+    ],
+    "description": "Passionnée par l'enseignement des mathématiques, je cherche à rencontrer quelqu'un qui partage mes valeurs.",
+    "goals": "Transmettre ma passion pour les mathématiques et construire une relation durable.",
+    "email": "marie.dupont@example.com"
   },
   {
-    "first_name": "Bob",
-    "age": 32,
+    "first_name": "Thomas",
+    "date_of_birth": "1992-07-22",
+    "gender": "MALE",
     "location": {
       "city_name": "Lyon",
       "coordinates": [
@@ -27,17 +37,25 @@
         45.7640
       ]
     },
-    "looking_for": "Amitié",
+    "looking_for": [
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "FEMALE"
+    ],
     "subject": "Histoire",
     "experience_years": 8,
-    "photos": [],
-    "description": "Historien amateur, je suis toujours partant pour une visite de musée ou un débat.",
-    "goals": "Rencontrer des gens partageant les mêmes intérêts pour des sorties culturelles.",
-    "email": "bob.legrand@example.com"
+    "photos": [
+      "https://example.com/photo2.jpg"
+    ],
+    "description": "Professeur d'histoire passionné, j'aime partager mes connaissances et découvrir de nouvelles perspectives.",
+    "goals": "Trouver quelqu'un avec qui partager ma passion pour l'histoire et la culture.",
+    "email": "thomas.martin@example.com"
   },
   {
-    "first_name": "Clara",
-    "age": 25,
+    "first_name": "Sophie",
+    "date_of_birth": "1998-11-03",
+    "gender": "FEMALE",
     "location": {
       "city_name": "Marseille",
       "coordinates": [
@@ -45,89 +63,27 @@
         43.2965
       ]
     },
-    "looking_for": "Relation légère",
-    "subject": "Biologie",
+    "looking_for": [
+      "FRIENDSHIP",
+      "CASUAL"
+    ],
+    "looking_for_gender": [
+      "MALE",
+      "FEMALE"
+    ],
+    "subject": "Anglais",
     "experience_years": 3,
-    "photos": [],
-    "description": "Jeune chercheuse en biologie, j'aime la nature et les activités en plein air.",
-    "goals": "Profiter de la vie et rencontrer de nouvelles personnes.",
-    "email": "clara.petit@example.com"
+    "photos": [
+      "https://example.com/photo3.jpg"
+    ],
+    "description": "Jeune professeure d'anglais, j'adore voyager et découvrir de nouvelles cultures.",
+    "goals": "Rencontrer des personnes ouvertes d'esprit pour partager des moments agréables.",
+    "email": "sophie.bernard@example.com"
   },
   {
-    "first_name": "David",
-    "age": 35,
-    "location": {
-      "city_name": "Bordeaux",
-      "coordinates": [
-        -0.5792,
-        44.8378
-      ]
-    },
-    "looking_for": "Relation sérieuse",
-    "subject": "Littérature",
-    "experience_years": 10,
-    "photos": [],
-    "description": "Écrivain et amateur de vin, je cherche quelqu'un avec qui partager mes passions.",
-    "goals": "Construire une relation durable et inspirante.",
-    "email": "david.moreau@example.com"
-  },
-  {
-    "first_name": "Eva",
-    "age": 29,
-    "location": {
-      "city_name": "Lille",
-      "coordinates": [
-        3.0573,
-        50.6292
-      ]
-    },
-    "looking_for": "Amitié",
-    "subject": "Arts Plastiques",
-    "experience_years": 5,
-    "photos": [],
-    "description": "Artiste peintre, je trouve l'inspiration dans les rencontres et les voyages.",
-    "goals": "Élargir mon cercle d'amis et collaborer sur des projets créatifs.",
-    "email": "eva.leroy@example.com"
-  },
-  {
-    "first_name": "François",
-    "age": 40,
-    "location": {
-      "city_name": "Nantes",
-      "coordinates": [
-        -1.5536,
-        47.2184
-      ]
-    },
-    "looking_for": "Relation sérieuse",
-    "subject": "Philosophie",
-    "experience_years": 15,
-    "photos": [],
-    "description": "Professeur de philosophie, j'aime les discussions profondes et les promenades en nature.",
-    "goals": "Trouver une partenaire de vie avec qui je peux grandir intellectuellement et émotionnellement.",
-    "email": "francois.roux@example.com"
-  },
-  {
-    "first_name": "Gabrielle",
-    "age": 27,
-    "location": {
-      "city_name": "Strasbourg",
-      "coordinates": [
-        7.7521,
-        48.5734
-      ]
-    },
-    "looking_for": "Relation légère",
-    "subject": "Langues",
-    "experience_years": 4,
-    "photos": [],
-    "description": "Traductrice, je suis passionnée par les cultures du monde et l'apprentissage de nouvelles langues.",
-    "goals": "Rencontrer des personnes ouvertes d'esprit pour des échanges culturels.",
-    "email": "gabrielle.fournier@example.com"
-  },
-  {
-    "first_name": "Hugo",
-    "age": 31,
+    "first_name": "Pierre",
+    "date_of_birth": "1989-05-18",
+    "gender": "MALE",
     "location": {
       "city_name": "Toulouse",
       "coordinates": [
@@ -135,35 +91,158 @@
         43.6047
       ]
     },
-    "looking_for": "Amitié",
-    "subject": "Informatique",
-    "experience_years": 7,
-    "photos": [],
-    "description": "Développeur de logiciels, je suis un grand fan de jeux de société et de science-fiction.",
-    "goals": "Trouver des amis pour des soirées jeux et des discussions tech.",
-    "email": "hugo.girard@example.com"
+    "looking_for": [
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "FEMALE"
+    ],
+    "subject": "Physique",
+    "experience_years": 10,
+    "photos": [
+      "https://example.com/photo4.jpg"
+    ],
+    "description": "Physicien et enseignant, je recherche une relation stable avec quelqu'un de curieux et intelligent.",
+    "goals": "Construire une famille avec quelqu'un qui partage ma passion pour les sciences.",
+    "email": "pierre.dubois@example.com"
   },
   {
-    "first_name": "Inès",
-    "age": 26,
+    "first_name": "Julie",
+    "date_of_birth": "1995-09-12",
+    "gender": "FEMALE",
     "location": {
       "city_name": "Nice",
       "coordinates": [
-        7.2620,
+        7.2619,
         43.7102
       ]
     },
-    "looking_for": "Relation sérieuse",
-    "subject": "Musique",
-    "experience_years": 9,
-    "photos": [],
-    "description": "Violoniste professionnelle, la musique est toute ma vie. J'aime aussi la mer et la randonnée.",
-    "goals": "Rencontrer quelqu'un qui apprécie les arts et la nature.",
-    "email": "ines.bonnet@example.com"
+    "looking_for": [
+      "FRIENDSHIP"
+    ],
+    "looking_for_gender": [
+      "MALE",
+      "FEMALE"
+    ],
+    "subject": "Biologie",
+    "experience_years": 6,
+    "photos": [
+      "https://example.com/photo5.jpg"
+    ],
+    "description": "Professeure de biologie, j'aime la nature et les activités en plein air.",
+    "goals": "Élargir mon cercle social et rencontrer des personnes partageant mes intérêts.",
+    "email": "julie.moreau@example.com"
   },
   {
-    "first_name": "Julien",
-    "age": 33,
+    "first_name": "Alexandre",
+    "date_of_birth": "1993-12-08",
+    "gender": "MALE",
+    "location": {
+      "city_name": "Nantes",
+      "coordinates": [
+        -1.5536,
+        47.2184
+      ]
+    },
+    "looking_for": [
+      "CASUAL",
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "FEMALE"
+    ],
+    "subject": "Informatique",
+    "experience_years": 7,
+    "photos": [
+      "https://example.com/photo6.jpg"
+    ],
+    "description": "Enseignant en informatique, passionné par les nouvelles technologies et l'innovation.",
+    "goals": "Rencontrer quelqu'un pour partager des projets et peut-être plus.",
+    "email": "alexandre.leroy@example.com"
+  },
+  {
+    "first_name": "Emma",
+    "date_of_birth": "1997-02-28",
+    "gender": "FEMALE",
+    "location": {
+      "city_name": "Strasbourg",
+      "coordinates": [
+        7.7521,
+        48.5734
+      ]
+    },
+    "looking_for": [
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "MALE"
+    ],
+    "subject": "Français",
+    "experience_years": 4,
+    "photos": [
+      "https://example.com/photo7.jpg"
+    ],
+    "description": "Professeure de français, amoureuse de la littérature et de la poésie.",
+    "goals": "Trouver l'amour avec quelqu'un qui apprécie la beauté des mots.",
+    "email": "emma.petit@example.com"
+  },
+  {
+    "first_name": "Lucas",
+    "date_of_birth": "1994-06-14",
+    "gender": "MALE",
+    "location": {
+      "city_name": "Bordeaux",
+      "coordinates": [
+        -0.5792,
+        44.8378
+      ]
+    },
+    "looking_for": [
+      "FRIENDSHIP",
+      "CASUAL"
+    ],
+    "looking_for_gender": [
+      "FEMALE"
+    ],
+    "subject": "Éducation physique",
+    "experience_years": 6,
+    "photos": [
+      "https://example.com/photo8.jpg"
+    ],
+    "description": "Prof de sport dynamique, j'aime les défis et les activités en groupe.",
+    "goals": "Rencontrer des personnes actives pour partager des moments sportifs et fun.",
+    "email": "lucas.robert@example.com"
+  },
+  {
+    "first_name": "Camille",
+    "date_of_birth": "1991-10-25",
+    "gender": "FEMALE",
+    "location": {
+      "city_name": "Lille",
+      "coordinates": [
+        3.0573,
+        50.6292
+      ]
+    },
+    "looking_for": [
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "MALE"
+    ],
+    "subject": "Chimie",
+    "experience_years": 9,
+    "photos": [
+      "https://example.com/photo9.jpg"
+    ],
+    "description": "Professeure de chimie, je cherche quelqu'un de stable et mature pour une relation durable.",
+    "goals": "Construire une relation solide basée sur la confiance et le respect mutuel.",
+    "email": "camille.richard@example.com"
+  },
+  {
+    "first_name": "Maxime",
+    "date_of_birth": "1996-01-30",
+    "gender": "MALE",
     "location": {
       "city_name": "Rennes",
       "coordinates": [
@@ -171,12 +250,20 @@
         48.1173
       ]
     },
-    "looking_for": "Relation légère",
-    "subject": "Économie",
-    "experience_years": 8,
-    "photos": [],
-    "description": "Consultant en économie, je suis curieux et j'aime découvrir de nouveaux restaurants et bars.",
-    "goals": "Faire des rencontres intéressantes et sans prise de tête.",
-    "email": "julien.andre@example.com"
+    "looking_for": [
+      "FRIENDSHIP",
+      "SERIOUS"
+    ],
+    "looking_for_gender": [
+      "FEMALE"
+    ],
+    "subject": "Géographie",
+    "experience_years": 5,
+    "photos": [
+      "https://example.com/photo10.jpg"
+    ],
+    "description": "Passionné de géographie et de voyages, je cherche quelqu'un pour explorer le monde.",
+    "goals": "Partager ma passion pour la découverte avec quelqu'un de spécial.",
+    "email": "maxime.garcia@example.com"
   }
 ]

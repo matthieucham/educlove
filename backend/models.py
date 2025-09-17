@@ -1,13 +1,19 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import List, Optional
 from enum import Enum
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 
 class LookingForEnum(str, Enum):
-    friendship = "Amitié"
-    casual = "Relation légère"
-    serious = "Relation sérieuse"
+    FRIENDSHIP = "FRIENDSHIP"
+    CASUAL = "CASUAL"
+    SERIOUS = "SERIOUS"
+
+
+class GenderEnum(str, Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    OTHER = "OTHER"
 
 
 class Location(BaseModel):
@@ -46,21 +52,19 @@ class Location(BaseModel):
 
 class Profile(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
-    age: int = Field(..., gt=17)
+    date_of_birth: date = Field(..., description="User's date of birth")
     gender: Optional[str] = Field(None, max_length=20, description="User's gender")
     location: Location = Field(
         ..., description="Geolocation information for the profile"
     )
     looking_for: List[str] = Field(
         ...,
-        min_length=1,
         description="What the user is looking for (multiple selections allowed)",
     )
     looking_for_gender: List[str] = Field(
-        ..., min_length=1, description="Gender preferences (MALE, FEMALE, OTHER)"
+        ..., description="Gender preferences (MALE, FEMALE, OTHER)"
     )
     subject: str = Field(..., min_length=1, max_length=100)
-    experience_years: int = Field(..., ge=0)
     photos: List[str] = []
     description: Optional[str] = Field(None, max_length=5000)
     goals: Optional[str] = Field(None, max_length=5000)
@@ -72,7 +76,7 @@ class Profile(BaseModel):
         json_schema_extra = {
             "example": {
                 "first_name": "Jane",
-                "age": 28,
+                "date_of_birth": "1996-03-15",
                 "gender": "FEMALE",
                 "location": {"city_name": "Paris", "coordinates": [2.3522, 48.8566]},
                 "looking_for": ["Amitié", "Relation sérieuse"],
@@ -99,11 +103,6 @@ class SearchCriteria(BaseModel):
     )
     age_min: Optional[int] = Field(None, ge=18, description="Minimum age")
     age_max: Optional[int] = Field(None, le=100, description="Maximum age")
-    gender: List[str] = Field(default=[], description="Preferred genders")
-    orientation: List[str] = Field(default=[], description="Preferred orientations")
-    looking_for: List[LookingForEnum] = Field(
-        default=[], description="What they are looking for"
-    )
     subjects: List[str] = Field(default=[], description="Teaching subjects")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -121,9 +120,6 @@ class SearchCriteria(BaseModel):
                 "radii": [25, 50],
                 "age_min": 25,
                 "age_max": 35,
-                "gender": ["Homme", "Femme"],
-                "orientation": ["Hétérosexuel(le)", "Bisexuel(le)"],
-                "looking_for": ["Relation sérieuse"],
                 "subjects": ["Mathématiques", "Physique"],
             }
         }

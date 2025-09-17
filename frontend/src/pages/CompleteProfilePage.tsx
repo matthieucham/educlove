@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { MapPicker } from '../components/ui';
 import { api } from '../services/api';
@@ -80,33 +80,27 @@ const CompleteProfilePage: React.FC = () => {
     setLoading(true);
 
     // Validate required fields
-    if (!firstName || !birthDay || !birthMonth || !birthYear || !gender || !city || !profilePhoto || lookingFor.length === 0 || lookingForGender.length === 0) {
+    if (!firstName || !birthDay || !birthMonth || !birthYear || !gender || !city || !profilePhoto) {
       setError('Veuillez remplir tous les champs obligatoires');
       setLoading(false);
       return;
     }
 
     try {
-      // Calculate age from birth date
       const birthDate = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
-      const age = Math.floor((Date.now() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
 
       // Prepare profile data
       const profileData = {
         first_name: firstName,
-        age: age,
+        date_of_birth: birthDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
         gender: gender, // Now including gender in profile creation
         location: {
           city_name: city,
           coordinates: coordinates || [0, 0]
         },
-        looking_for: lookingFor.map(value =>
-          value === 'FRIENDSHIP' ? 'Amitié' :
-            value === 'CASUAL' ? 'Relation légère' : 'Relation sérieuse'
-        ),
-        looking_for_gender: lookingForGender,
+        looking_for: [],// This will need to be added to the form
+        looking_for_gender: [],// This will need to be added to the form
         subject: 'À définir', // This will need to be added to the form
-        experience_years: 0, // This will need to be added to the form
         photos: [], // Handle photo upload separately
         description: '',
         goals: '',
@@ -250,121 +244,6 @@ const CompleteProfilePage: React.FC = () => {
               }}
               placeholder="Ex: Paris, Lyon, Marseille..."
             />
-          </div>
-
-          {/* Vous recherchez + Avec */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vous recherchez (plusieurs choix possibles)
-              </label>
-              <div className="space-y-2 border border-gray-300 rounded-lg p-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="FRIENDSHIP"
-                    checked={lookingFor.includes('FRIENDSHIP')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingFor([...lookingFor, 'FRIENDSHIP']);
-                      } else {
-                        setLookingFor(lookingFor.filter(v => v !== 'FRIENDSHIP'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Amitié</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="CASUAL"
-                    checked={lookingFor.includes('CASUAL')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingFor([...lookingFor, 'CASUAL']);
-                      } else {
-                        setLookingFor(lookingFor.filter(v => v !== 'CASUAL'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Relation légère</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="SERIOUS"
-                    checked={lookingFor.includes('SERIOUS')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingFor([...lookingFor, 'SERIOUS']);
-                      } else {
-                        setLookingFor(lookingFor.filter(v => v !== 'SERIOUS'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Relation sérieuse</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Avec (plusieurs choix possibles)
-              </label>
-              <div className="space-y-2 border border-gray-300 rounded-lg p-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="MALE"
-                    checked={lookingForGender.includes('MALE')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingForGender([...lookingForGender, 'MALE']);
-                      } else {
-                        setLookingForGender(lookingForGender.filter(v => v !== 'MALE'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Homme</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="FEMALE"
-                    checked={lookingForGender.includes('FEMALE')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingForGender([...lookingForGender, 'FEMALE']);
-                      } else {
-                        setLookingForGender(lookingForGender.filter(v => v !== 'FEMALE'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Femme</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value="OTHER"
-                    checked={lookingForGender.includes('OTHER')}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLookingForGender([...lookingForGender, 'OTHER']);
-                      } else {
-                        setLookingForGender(lookingForGender.filter(v => v !== 'OTHER'));
-                      }
-                    }}
-                    className="mr-2 text-purple-600 focus:ring-purple-500"
-                  />
-                  <span>Autre</span>
-                </label>
-              </div>
-            </div>
           </div>
 
           {/* Photo de profil */}

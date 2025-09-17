@@ -7,7 +7,7 @@ Run from the backend directory: python seed_db.py
 import json
 from pathlib import Path
 from pymongo import MongoClient
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 
 def seed_database():
@@ -39,6 +39,10 @@ def seed_database():
         profile["created_at"] = datetime.now(timezone.utc)
         profile["updated_at"] = datetime.now(timezone.utc)
 
+        # Convert date_of_birth string to datetime object for MongoDB
+        if "date_of_birth" in profile and isinstance(profile["date_of_birth"], str):
+            profile["date_of_birth"] = datetime.fromisoformat(profile["date_of_birth"])
+
         # Transform location to GeoJSON format for MongoDB
         if "location" in profile:
             location = profile["location"]
@@ -47,6 +51,10 @@ def seed_database():
                 "coordinates": location["coordinates"],
                 "city_name": location["city_name"],
             }
+
+        # Add experience_years if not present (for backward compatibility)
+        if "experience_years" not in profile:
+            profile["experience_years"] = 5  # Default value
 
         profiles_collection.insert_one(profile)
 
@@ -57,6 +65,18 @@ def seed_database():
     if sample:
         print(f"\nSample profile structure:")
         print(f"  Name: {sample.get('first_name')}")
+        print(f"  Date of Birth: {sample.get('date_of_birth')}")
+        if "date_of_birth" in sample:
+            today = date.today()
+            dob = sample["date_of_birth"]
+            if isinstance(dob, datetime):
+                dob = dob.date()
+            age = (
+                today.year
+                - dob.year
+                - ((today.month, today.day) < (dob.month, dob.day))
+            )
+            print(f"  Computed Age: {age}")
         print(f"  Location: {sample.get('location', {}).get('city_name')}")
         print(f"  Coordinates: {sample.get('location', {}).get('coordinates')}")
 

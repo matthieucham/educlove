@@ -28,9 +28,6 @@ class SearchCriteriaRequest(BaseModel):
     )
     age_min: Optional[int] = Field(None, ge=18, description="Minimum age")
     age_max: Optional[int] = Field(None, le=100, description="Maximum age")
-    gender: List[str] = Field(default=[], description="Preferred genders")
-    orientation: List[str] = Field(default=[], description="Preferred orientations")
-    looking_for: List[str] = Field(default=[], description="What they are looking for")
     subjects: List[str] = Field(default=[], description="Teaching subjects")
 
 
