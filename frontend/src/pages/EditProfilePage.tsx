@@ -49,8 +49,8 @@ const MultiSelect = ({
             variant={selected.includes(option.value) ? 'primary' : 'outline'}
             size="sm"
             className={`transition-all duration-200 ${selected.includes(option.value)
-                ? ''
-                : 'hover:bg-purple-100'
+              ? ''
+              : 'hover:bg-purple-100'
               }`}
           >
             {option.label}
@@ -252,10 +252,9 @@ const EditProfilePage: React.FC = () => {
     }
 
     try {
+      // Profile always exists (created during registration)
+      // For updates, exclude immutable fields (first_name, date_of_birth, gender)
       const profileData = {
-        first_name: firstName,
-        age: parseInt(age),
-        gender: gender,
         location: {
           city_name: city,
           // Send [0, 0] to trigger geocoding in backend
@@ -264,29 +263,21 @@ const EditProfilePage: React.FC = () => {
         looking_for: lookingFor,
         looking_for_gender: lookingForGender,
         subject: subject || 'Non spécifié', // Optional field
-        experience_years: 0, // Removed from form
         photos: photos,
         description: descriptionEditor?.getHTML() || '',
         goals: goalsEditor?.getHTML() || '', // Optional field
         email: 'user@example.com' // Will be filled from user data in backend
       };
 
-      let response;
-      if (profileExists) {
-        // Update existing profile
-        response = await api.put('/profiles/my-profile', profileData);
-      } else {
-        // Create new profile
-        response = await api.post('/profiles/my-profile', profileData);
-      }
+      // Update existing profile (without immutable fields)
+      const response = await api.put('/profiles/my-profile', profileData);
 
       // Extract geocoded coordinates from response if available
       if (response.data.location?.coordinates) {
         setCoordinates(response.data.location.coordinates);
       }
 
-      setSuccess(profileExists ? 'Profil mis à jour avec succès!' : 'Profil créé avec succès!');
-      setProfileExists(true);
+      setSuccess('Profil mis à jour avec succès!');
 
       // Redirect to dashboard after 2 seconds
       setTimeout(() => {
@@ -336,7 +327,7 @@ const EditProfilePage: React.FC = () => {
 
       <Card className="max-w-2xl w-full p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          {profileExists ? 'Modifier votre profil' : 'Créer votre profil'}
+          Modifier votre profil
         </h1>
 
         {/* Subtitle with first name, age, and gender */}
@@ -490,7 +481,7 @@ const EditProfilePage: React.FC = () => {
                   <span>Enregistrement...</span>
                 </div>
               ) : (
-                profileExists ? 'Enregistrer les modifications' : 'Créer le profil'
+                'Enregistrer les modifications'
               )}
             </Button>
           </div>

@@ -4,7 +4,7 @@ Profile routes for the EducLove API.
 
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 from auth import get_current_user
-from models import Profile, User, SearchCriteria, Location
+from models import Profile, ProfileUpdate, User, SearchCriteria, Location
 from typing import TYPE_CHECKING, Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 from services.geocoding import get_geocoding_service
@@ -194,12 +194,13 @@ def get_my_profile(
 
 @router.put("/my-profile")
 async def update_my_profile(
-    profile: Profile,
+    profile_update: ProfileUpdate,
     current_user: User = Depends(get_current_user),
     db: "MongoDatabase" = Depends(get_db),
 ):
     """
     Update the profile of the authenticated user.
+    Only allows updating mutable fields (excludes first_name, date_of_birth, gender).
     Automatically geocodes the location if only city name is provided.
     """
     try:
@@ -218,30 +219,30 @@ async def update_my_profile(
             )
 
         # Geocode the location if coordinates are not provided or are [0, 0]
-        if profile.location and (
-            not profile.location.coordinates
-            or profile.location.coordinates == [0, 0]
-            or profile.location.coordinates == [0.0, 0.0]
+        if profile_update.location and (
+            not profile_update.location.coordinates
+            or profile_update.location.coordinates == [0, 0]
+            or profile_update.location.coordinates == [0.0, 0.0]
         ):
             geocoding_service = get_geocoding_service()
             coordinates = await geocoding_service.get_coordinates_from_city(
-                profile.location.city_name, country="FR"
+                profile_update.location.city_name, country="FR"
             )
 
             if coordinates:
                 # Update the location with geocoded coordinates
-                profile.location.coordinates = list(coordinates)
+                profile_update.location.coordinates = list(coordinates)
                 logger.info(
-                    f"Geocoded location '{profile.location.city_name}' to {coordinates}"
+                    f"Geocoded location '{profile_update.location.city_name}' to {coordinates}"
                 )
             else:
                 logger.warning(
-                    f"Could not geocode location '{profile.location.city_name}', using default [0, 0]"
+                    f"Could not geocode location '{profile_update.location.city_name}', using default [0, 0]"
                 )
-                profile.location.coordinates = [0, 0]
+                profile_update.location.coordinates = [0, 0]
 
-        # Update the profile
-        profile_data = profile.model_dump(by_alias=True)
+        # Update the profile (only mutable fields)
+        profile_data = profile_update.model_dump(by_alias=True)
         success = db.profiles_repo.update_profile(user["profile_id"], profile_data)
 
         if not success:

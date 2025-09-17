@@ -50,10 +50,9 @@ class Location(BaseModel):
         }
 
 
-class Profile(BaseModel):
-    first_name: str = Field(..., min_length=1, max_length=50)
-    date_of_birth: date = Field(..., description="User's date of birth")
-    gender: Optional[str] = Field(None, max_length=20, description="User's gender")
+class ProfileBase(BaseModel):
+    """Base model with common fields for Profile and ProfileUpdate"""
+
     location: Location = Field(
         ..., description="Geolocation information for the profile"
     )
@@ -73,6 +72,18 @@ class Profile(BaseModel):
     class Config:
         from_attributes = True
         use_enum_values = True
+
+
+class Profile(ProfileBase):
+    """Complete profile model including immutable fields"""
+
+    first_name: str = Field(..., min_length=1, max_length=50)
+    date_of_birth: date = Field(..., description="User's date of birth")
+    gender: Optional[str] = Field(None, max_length=20, description="User's gender")
+
+    class Config:
+        from_attributes = True
+        use_enum_values = True
         json_schema_extra = {
             "example": {
                 "first_name": "Jane",
@@ -83,6 +94,27 @@ class Profile(BaseModel):
                 "looking_for_gender": ["MALE", "FEMALE"],
                 "subject": "Mathématiques",
                 "experience_years": 5,
+                "photos": ["http://example.com/photo1.jpg"],
+                "description": "A passionate math teacher looking for a serious relationship.",
+                "goals": "My goal is to inspire students and find a life partner.",
+                "email": "jane.doe@example.com",
+            }
+        }
+
+
+class ProfileUpdate(ProfileBase):
+    """Model for updating profile - excludes immutable fields like first_name, date_of_birth, and gender"""
+
+    class Config:
+        from_attributes = True
+        use_enum_values = True
+        extra = "forbid"  # This will reject any extra fields not defined in the model
+        json_schema_extra = {
+            "example": {
+                "location": {"city_name": "Paris", "coordinates": [2.3522, 48.8566]},
+                "looking_for": ["Amitié", "Relation sérieuse"],
+                "looking_for_gender": ["MALE", "FEMALE"],
+                "subject": "Mathématiques",
                 "photos": ["http://example.com/photo1.jpg"],
                 "description": "A passionate math teacher looking for a serious relationship.",
                 "goals": "My goal is to inspire students and find a life partner.",
