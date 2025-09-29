@@ -61,7 +61,7 @@ const CompleteProfilePage: React.FC = () => {
   useEffect(() => {
     // Check if user already has a completed profile
     if (user?.profile_completed) {
-      navigate('/dashboard');
+      navigate('/profiles');
     }
 
     // Pre-fill firstName from user.name if available
@@ -111,8 +111,8 @@ const CompleteProfilePage: React.FC = () => {
         // Refresh user data to get updated profile_completed status
         await checkAuth();
 
-        // Redirect to dashboard
-        navigate('/dashboard');
+        // Redirect to profiles page
+        navigate('/profiles');
       }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Une erreur est survenue lors de la création du profil');

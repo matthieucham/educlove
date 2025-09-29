@@ -143,8 +143,8 @@ const SearchCriteriaPage: React.FC = () => {
             </div>
             <h1 className="text-2xl font-bold ml-3 text-gray-800">EducLove</h1>
           </div>
-          <Link to="/dashboard" className="text-gray-600 hover:text-purple-600 font-semibold text-sm">
-            ← Retour au tableau de bord
+          <Link to="/profiles" className="text-gray-600 hover:text-purple-600 font-semibold text-sm">
+            ← Retour aux profils
           </Link>
         </div>
       </div>

@@ -6,10 +6,11 @@ import EmailVerificationPage from './pages/EmailVerificationPage';
 import SearchCriteriaPage from './pages/SearchCriteriaPage';
 import ProfilesPage from './pages/ProfilesPage';
 import EditProfilePage from './pages/EditProfilePage';
-import DashboardPage from './pages/DashboardPage';
 import MyMatchesPage from './pages/MyMatchesPage';
 import WelcomePage from './pages/WelcomePage';
 import ComponentsDemo from './pages/ComponentsDemo';
+import AccountPage from './pages/AccountPage';
+import Navigation from './components/Navigation';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
@@ -24,6 +25,7 @@ function App() {
 
   return (
     <Router>
+      <Navigation />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<WelcomePage />} />
@@ -39,12 +41,12 @@ function App() {
 
         {/* Fully protected routes (requires auth + complete profile) */}
         <Route element={<ProtectedRoute requireProfile={true} />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/search-criteria" element={<SearchCriteriaPage />} />
           <Route path="/profiles" element={<ProfilesPage />} />
           <Route path="/profile/:profileId" element={<ProfilesPage />} />
+          <Route path="/search-criteria" element={<SearchCriteriaPage />} />
           <Route path="/edit-profile" element={<EditProfilePage />} />
           <Route path="/my-matches" element={<MyMatchesPage />} />
+          <Route path="/account" element={<AccountPage />} />
         </Route>
 
         {/* Catch all - redirect to home */}

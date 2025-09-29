@@ -18,7 +18,7 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       await loginWithEmail(email, password);
-      navigate('/dashboard');
+      navigate('/profiles');
     } catch (err) {
       console.error('Login failed:', err);
     } finally {

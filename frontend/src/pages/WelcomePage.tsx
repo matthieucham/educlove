@@ -67,7 +67,7 @@ const WelcomePage: React.FC = () => {
             <>
               <Button
                 variant="primary"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/profiles')}
               >
                 Mon Profil
               </Button>
