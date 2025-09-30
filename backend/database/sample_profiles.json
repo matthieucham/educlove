@@ -18,10 +18,12 @@
       "MALE"
     ],
     "subject": "Mathématiques",
-    "experience_years": 5,
-    "description": "Passionnée par l'enseignement des mathématiques, je cherche à rencontrer quelqu'un qui partage mes valeurs.",
-    "goals": "Transmettre ma passion pour les mathématiques et construire une relation durable.",
-    "email": "marie.dupont@example.com"
+    "description": "Passionnée par l'enseignement des mathématiques, je cherche à rencontrer quelqu'un qui partage mes valeurs et mon amour pour l'éducation.",
+    "goals": "Transmettre ma passion pour les mathématiques et construire une relation durable basée sur le respect mutuel.",
+    "favorite_quote": "Les mathématiques sont la poésie de la logique. - Albert Einstein",
+    "exclusivity_view": "Oui",
+    "has_pet": true,
+    "email": "marie.dupont@educnat.gouv.fr"
   },
   {
     "first_name": "Thomas",
@@ -35,16 +37,19 @@
       ]
     },
     "looking_for": [
-      "SERIOUS"
+      "SERIOUS",
+      "MARRIAGE"
     ],
     "looking_for_gender": [
       "FEMALE"
     ],
-    "subject": "Histoire",
-    "experience_years": 8,
-    "description": "Professeur d'histoire passionné, j'aime partager mes connaissances et découvrir de nouvelles perspectives.",
-    "goals": "Trouver quelqu'un avec qui partager ma passion pour l'histoire et la culture.",
-    "email": "thomas.martin@example.com"
+    "subject": "Histoire-Géographie",
+    "description": "Professeur d'histoire passionné, j'aime partager mes connaissances et découvrir de nouvelles perspectives. Amateur de musées et de voyages culturels.",
+    "goals": "Trouver quelqu'un avec qui partager ma passion pour l'histoire et construire un avenir ensemble.",
+    "favorite_quote": "L'histoire est un perpétuel recommencement. - Thucydide",
+    "exclusivity_view": "Oui",
+    "has_pet": false,
+    "email": "thomas.martin@educnat.gouv.fr"
   },
   {
     "first_name": "Sophie",
@@ -66,10 +71,12 @@
       "FEMALE"
     ],
     "subject": "Anglais",
-    "experience_years": 3,
-    "description": "Jeune professeure d'anglais, j'adore voyager et découvrir de nouvelles cultures.",
-    "goals": "Rencontrer des personnes ouvertes d'esprit pour partager des moments agréables.",
-    "email": "sophie.bernard@example.com"
+    "description": "Jeune professeure d'anglais, j'adore voyager et découvrir de nouvelles cultures. Passionnée par les langues et les échanges interculturels.",
+    "goals": "Rencontrer des personnes ouvertes d'esprit pour partager des moments agréables et enrichissants.",
+    "favorite_quote": "The limits of my language mean the limits of my world. - Ludwig Wittgenstein",
+    "exclusivity_view": "Ça se discute",
+    "has_pet": true,
+    "email": "sophie.bernard@educnat.gouv.fr"
   },
   {
     "first_name": "Pierre",
@@ -83,16 +90,19 @@
       ]
     },
     "looking_for": [
-      "SERIOUS"
+      "SERIOUS",
+      "MARRIAGE"
     ],
     "looking_for_gender": [
       "FEMALE"
     ],
-    "subject": "Physique",
-    "experience_years": 10,
-    "description": "Physicien et enseignant, je recherche une relation stable avec quelqu'un de curieux et intelligent.",
-    "goals": "Construire une famille avec quelqu'un qui partage ma passion pour les sciences.",
-    "email": "pierre.dubois@example.com"
+    "subject": "Physique-Chimie",
+    "description": "Physicien et enseignant, je recherche une relation stable avec quelqu'un de curieux et intelligent. J'aime les expériences scientifiques et la vulgarisation.",
+    "goals": "Construire une famille avec quelqu'un qui partage ma passion pour les sciences et l'éducation.",
+    "favorite_quote": "La science, c'est ce que le père enseigne à son fils. La technologie, c'est ce que le fils enseigne à son père. - Michel Serres",
+    "exclusivity_view": "Oui",
+    "has_pet": false,
+    "email": "pierre.dubois@educnat.gouv.fr"
   },
   {
     "first_name": "Julie",
@@ -112,11 +122,13 @@
       "MALE",
       "FEMALE"
     ],
-    "subject": "Biologie",
-    "experience_years": 6,
-    "description": "Professeure de biologie, j'aime la nature et les activités en plein air.",
-    "goals": "Élargir mon cercle social et rencontrer des personnes partageant mes intérêts.",
-    "email": "julie.moreau@example.com"
+    "subject": "Sciences de la Vie et de la Terre",
+    "description": "Professeure de SVT, j'aime la nature et les activités en plein air. Passionnée par l'écologie et la protection de l'environnement.",
+    "goals": "Élargir mon cercle social et rencontrer des personnes partageant mes valeurs écologiques.",
+    "favorite_quote": "Dans la nature, rien n'existe seul. - Rachel Carson",
+    "exclusivity_view": "Non",
+    "has_pet": true,
+    "email": "julie.moreau@educnat.gouv.fr"
   },
   {
     "first_name": "Alexandre",
@@ -136,11 +148,13 @@
     "looking_for_gender": [
       "FEMALE"
     ],
-    "subject": "Informatique",
-    "experience_years": 7,
-    "description": "Enseignant en informatique, passionné par les nouvelles technologies et l'innovation.",
-    "goals": "Rencontrer quelqu'un pour partager des projets et peut-être plus.",
-    "email": "alexandre.leroy@example.com"
+    "subject": "Technologie",
+    "description": "Enseignant en technologie, passionné par les nouvelles technologies et l'innovation. J'aime créer et bricoler.",
+    "goals": "Rencontrer quelqu'un pour partager des projets créatifs et peut-être construire quelque chose de durable.",
+    "favorite_quote": "La technologie est un outil formidable pour libérer la créativité humaine.",
+    "exclusivity_view": "Ça se discute",
+    "has_pet": false,
+    "email": "alexandre.leroy@educnat.gouv.fr"
   },
   {
     "first_name": "Emma",
@@ -159,11 +173,13 @@
     "looking_for_gender": [
       "MALE"
     ],
-    "subject": "Français",
-    "experience_years": 4,
-    "description": "Professeure de français, amoureuse de la littérature et de la poésie.",
-    "goals": "Trouver l'amour avec quelqu'un qui apprécie la beauté des mots.",
-    "email": "emma.petit@example.com"
+    "subject": "Lettres modernes",
+    "description": "Professeure de français, amoureuse de la littérature et de la poésie. J'écris à mes heures perdues et j'adore le théâtre.",
+    "goals": "Trouver l'amour avec quelqu'un qui apprécie la beauté des mots et la profondeur des émotions.",
+    "favorite_quote": "La poésie, c'est le plus joli surnom qu'on donne à la vie. - Jacques Prévert",
+    "exclusivity_view": "Oui",
+    "has_pet": true,
+    "email": "emma.petit@educnat.gouv.fr"
   },
   {
     "first_name": "Lucas",
@@ -183,16 +199,18 @@
     "looking_for_gender": [
       "FEMALE"
     ],
-    "subject": "Éducation physique",
-    "experience_years": 6,
-    "description": "Prof de sport dynamique, j'aime les défis et les activités en groupe.",
-    "goals": "Rencontrer des personnes actives pour partager des moments sportifs et fun.",
-    "email": "lucas.robert@example.com"
+    "subject": "Éducation physique et sportive",
+    "description": "Prof d'EPS dynamique, j'aime les défis sportifs et les activités en groupe. Passionné de sports collectifs et de course à pied.",
+    "goals": "Rencontrer des personnes actives pour partager des moments sportifs et créer des liens authentiques.",
+    "favorite_quote": "Le sport va chercher la peur pour la dominer, la fatigue pour en triompher, la difficulté pour la vaincre. - Pierre de Coubertin",
+    "exclusivity_view": "Non",
+    "has_pet": false,
+    "email": "lucas.robert@educnat.gouv.fr"
   },
   {
     "first_name": "Camille",
     "date_of_birth": "1991-10-25",
-    "gender": "FEMALE",
+    "gender": "OTHER",
     "location": {
       "city_name": "Lille",
       "coordinates": [
@@ -204,13 +222,17 @@
       "SERIOUS"
     ],
     "looking_for_gender": [
-      "MALE"
+      "MALE",
+      "FEMALE",
+      "OTHER"
     ],
-    "subject": "Chimie",
-    "experience_years": 9,
-    "description": "Professeure de chimie, je cherche quelqu'un de stable et mature pour une relation durable.",
-    "goals": "Construire une relation solide basée sur la confiance et le respect mutuel.",
-    "email": "camille.richard@example.com"
+    "subject": "Philosophie",
+    "description": "Professeur·e de philosophie, je cherche quelqu'un pour des discussions profondes et une relation authentique. J'aime questionner le monde.",
+    "goals": "Construire une relation solide basée sur la compréhension mutuelle et l'acceptation de nos différences.",
+    "favorite_quote": "On ne naît pas femme, on le devient. - Simone de Beauvoir",
+    "exclusivity_view": "Ça se discute",
+    "has_pet": true,
+    "email": "camille.richard@educnat.gouv.fr"
   },
   {
     "first_name": "Maxime",
@@ -230,10 +252,12 @@
     "looking_for_gender": [
       "FEMALE"
     ],
-    "subject": "Géographie",
-    "experience_years": 5,
-    "description": "Passionné de géographie et de voyages, je cherche quelqu'un pour explorer le monde.",
-    "goals": "Partager ma passion pour la découverte avec quelqu'un de spécial.",
-    "email": "maxime.garcia@example.com"
+    "subject": "Économie-Gestion",
+    "description": "Passionné d'économie et de géopolitique, je cherche quelqu'un pour explorer le monde et comprendre ses enjeux ensemble.",
+    "goals": "Partager ma passion pour la découverte et l'analyse du monde contemporain avec quelqu'un de spécial.",
+    "favorite_quote": "L'économie c'est la science du partage. Il faut apprendre à partager la richesse et le travail.",
+    "exclusivity_view": "Oui",
+    "has_pet": false,
+    "email": "maxime.garcia@educnat.gouv.fr"
   }
 ]

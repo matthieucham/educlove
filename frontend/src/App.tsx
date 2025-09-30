@@ -4,7 +4,7 @@ import CompleteProfilePage from './pages/CompleteProfilePage';
 import CreateAccountPage from './pages/CreateAccountPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import SearchCriteriaPage from './pages/SearchCriteriaPage';
-import ProfilesPage from './pages/ProfilesPage';
+import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
 import MyMatchesPage from './pages/MyMatchesPage';
 import WelcomePage from './pages/WelcomePage';
@@ -33,6 +33,7 @@ function App() {
         <Route path="/create-account" element={<CreateAccountPage />} />
         <Route path="/email-verification" element={<EmailVerificationPage />} />
         <Route path="/components-demo" element={<ComponentsDemo />} />
+        <Route path="/profile-demo/:profileId" element={<ProfilePage />} />
 
         {/* Semi-protected route (requires auth but not complete profile) */}
         <Route element={<ProtectedRoute requireProfile={false} />}>
@@ -41,8 +42,8 @@ function App() {
 
         {/* Fully protected routes (requires auth + complete profile) */}
         <Route element={<ProtectedRoute requireProfile={true} />}>
-          <Route path="/profiles" element={<ProfilesPage />} />
-          <Route path="/profile/:profileId" element={<ProfilesPage />} />
+          <Route path="/profiles" element={<ProfilePage />} />
+          <Route path="/profile/:profileId" element={<ProfilePage />} />
           <Route path="/search-criteria" element={<SearchCriteriaPage />} />
           <Route path="/edit-profile" element={<EditProfilePage />} />
           <Route path="/my-matches" element={<MyMatchesPage />} />
