@@ -194,8 +194,22 @@ const ProfilePage: React.FC = () => {
     fetchProfiles();
   }, [profileId, checkingCriteria]);
 
+  // Function to record profile visit
+  const recordProfileVisit = async (profileId: string) => {
+    try {
+      await api.post(`/api/profile-visits/${profileId}`);
+    } catch (error) {
+      // Silently fail - we don't want to interrupt the user experience
+      console.error('Failed to record profile visit:', error);
+    }
+  };
 
-  const handleMatch = () => {
+  const handleMatch = async () => {
+    // Record profile visit when user clicks "J'aimerais te connaitre"
+    const currentProfile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
+    if (currentProfile) {
+      await recordProfileVisit(currentProfile.id);
+    }
     // Show modal to send a message with the like
     setShowMessageModal(true);
   };
@@ -233,8 +247,15 @@ const ProfilePage: React.FC = () => {
     setShowMessageModal(false);
   };
 
-  const showNextProfile = useCallback(() => {
+  const showNextProfile = useCallback(async () => {
     if (profiles.length === 0) return;
+
+    // Record profile visit when user clicks "Voir d'autres profils"
+    const currentProfile = profiles[currentProfileIndex];
+    if (currentProfile) {
+      await recordProfileVisit(currentProfile.id);
+    }
+
     const nextIndex = (currentProfileIndex + 1) % profiles.length;
     setCurrentProfileIndex(nextIndex);
     // Update URL without full navigation
@@ -254,33 +275,53 @@ const ProfilePage: React.FC = () => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
-  const onTouchEnd = () => {
+  const onTouchEnd = async () => {
     if (!touchStart || !touchEnd) return;
 
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
+    const currentProfile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
+
     if (isLeftSwipe) {
+      // Record profile visit when swiping left
+      if (currentProfile) {
+        await recordProfileVisit(currentProfile.id);
+      }
       showNextProfile();
     } else if (isRightSwipe) {
+      // Record profile visit when swiping right
+      if (currentProfile) {
+        await recordProfileVisit(currentProfile.id);
+      }
       handleMatch();
     }
   };
 
   // Keyboard navigation
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
+    const handleKeyPress = async (e: KeyboardEvent) => {
+      const currentProfile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
+
       if (e.key === 'ArrowLeft') {
+        // Record profile visit when using arrow key
+        if (currentProfile) {
+          await recordProfileVisit(currentProfile.id);
+        }
         showNextProfile();
       } else if (e.key === 'ArrowRight') {
+        // Record profile visit when using arrow key
+        if (currentProfile) {
+          await recordProfileVisit(currentProfile.id);
+        }
         handleMatch();
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showNextProfile, handleMatch]);
+  }, [showNextProfile, handleMatch, profiles, currentProfileIndex]);
 
   const getGenderDisplay = (gender: string) => {
     switch (gender) {
