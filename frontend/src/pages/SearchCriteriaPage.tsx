@@ -105,17 +105,6 @@ const SearchCriteriaPage: React.FC = () => {
     loadSearchCriteria();
   }, []);
 
-  // Pre-fill form with user's saved criteria (from navigation state)
-  useEffect(() => {
-    if (userProfile) {
-      // Set location from profile if available
-      if (userProfile.location && locations[0].city === '') {
-        setLocations([{ city: userProfile.location, coordinates: null }]);
-      }
-
-    }
-  }, [userProfile]);
-
   const icons = {
     close: "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
   };
@@ -134,20 +123,6 @@ const SearchCriteriaPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex flex-col items-center p-4">
-      {/* Header with Logo */}
-      <div className="w-full max-w-2xl mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full p-2">
-              <Logo size="medium" className="text-white" />
-            </div>
-            <h1 className="text-2xl font-bold ml-3 text-gray-800">EducLove</h1>
-          </div>
-          <Link to="/profiles" className="text-gray-600 hover:text-purple-600 font-semibold text-sm">
-            ← Retour aux profils
-          </Link>
-        </div>
-      </div>
 
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Critères de recherche</h1>
@@ -190,10 +165,11 @@ const SearchCriteriaPage: React.FC = () => {
               Sa localisation
             </label>
             {locations.map((location, index) => (
-              <div key={index} className="mb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1">
+              <div key={`${index}-${location.city}`} className="mb-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-grow basis-64">
                     <MapPicker
+                      key={`map-${index}-${location.city}`}
                       value={location.city}
                       coordinates={location.coordinates}
                       onChange={(city, coords) => {
@@ -204,30 +180,32 @@ const SearchCriteriaPage: React.FC = () => {
                       placeholder="Entrez une ville ou cliquez sur la carte"
                     />
                   </div>
-                  <select
-                    value={radii[index]}
-                    onChange={(e) => {
-                      const newRadii = [...radii];
-                      newRadii[index] = Number(e.target.value);
-                      setRadii(newRadii);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value={0}>0 km</option>
-                    <option value={5}>5 km</option>
-                    <option value={10}>10 km</option>
-                    <option value={25}>25 km</option>
-                    <option value={50}>50 km</option>
-                  </select>
-                  {locations.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveLocation(index)}
-                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={radii[index]}
+                      onChange={(e) => {
+                        const newRadii = [...radii];
+                        newRadii[index] = Number(e.target.value);
+                        setRadii(newRadii);
+                      }}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     >
-                      <Icon path={icons.close} />
-                    </button>
-                  )}
+                      <option value={0}>0 km</option>
+                      <option value={5}>5 km</option>
+                      <option value={10}>10 km</option>
+                      <option value={25}>25 km</option>
+                      <option value={50}>50 km</option>
+                    </select>
+                    {locations.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLocation(index)}
+                        className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                      >
+                        <Icon path={icons.close} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -276,7 +254,7 @@ const SearchCriteriaPage: React.FC = () => {
                   // Save search criteria to backend (backend will geocode the locations)
                   await api.post('/profiles/my-profile/search-criteria', searchCriteriaData);
 
-                  // Navigate to profiles page
+                  // Navigate to profiles page - profiles will be re-fetched automatically
                   navigate('/profiles');
                 } catch (error) {
                   console.error('Error saving search criteria:', error);

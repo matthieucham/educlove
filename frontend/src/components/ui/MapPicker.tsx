@@ -1,7 +1,23 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
 import { cn } from '../../lib/utils';
 import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icon in react-leaflet
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapPickerProps {
     value?: string;
@@ -74,6 +90,7 @@ const MapPicker: React.FC<MapPickerProps> = ({
 }) => {
     const [isMapVisible, setMapVisible] = useState(false);
     const [inputValue, setInputValue] = useState(value);
+    const [showCoordinates, setShowCoordinates] = useState(false);
     const [currentCoordinates, setCurrentCoordinates] = useState<[number, number] | null>(coordinates);
 
     const handleLocationSelect = (city: string, coords: [number, number]) => {
@@ -126,7 +143,7 @@ const MapPicker: React.FC<MapPickerProps> = ({
                 </button>
             </div>
 
-            {currentCoordinates && currentCoordinates[0] !== 0 && currentCoordinates[1] !== 0 && (
+            {showCoordinates && currentCoordinates && currentCoordinates[0] !== 0 && currentCoordinates[1] !== 0 && (
                 <div className="mt-1 text-xs text-gray-500">
                     <Icon path={icons.location} className="w-3 h-3 inline mr-1" />
                     Coordonnées: [{currentCoordinates[0].toFixed(4)}, {currentCoordinates[1].toFixed(4)}]
@@ -145,8 +162,12 @@ const MapPicker: React.FC<MapPickerProps> = ({
                         </h3>
                         <div className="h-[calc(100%-40px)] w-full">
                             <MapContainer
-                                center={mapCenter}
-                                zoom={mapZoom}
+                                center={currentCoordinates && currentCoordinates[0] !== 0 && currentCoordinates[1] !== 0
+                                    ? [currentCoordinates[1], currentCoordinates[0]]
+                                    : mapCenter}
+                                zoom={currentCoordinates && currentCoordinates[0] !== 0 && currentCoordinates[1] !== 0
+                                    ? 10
+                                    : mapZoom}
                                 scrollWheelZoom={true}
                                 style={{ height: '100%', width: '100%' }}
                             >
@@ -158,6 +179,10 @@ const MapPicker: React.FC<MapPickerProps> = ({
                                     onLocationSelect={handleLocationSelect}
                                     onClose={() => setMapVisible(false)}
                                 />
+                                {/* Show marker at registered location if coordinates exist */}
+                                {currentCoordinates && currentCoordinates[0] !== 0 && currentCoordinates[1] !== 0 && (
+                                    <Marker position={[currentCoordinates[1], currentCoordinates[0]]} />
+                                )}
                             </MapContainer>
                         </div>
                         <button

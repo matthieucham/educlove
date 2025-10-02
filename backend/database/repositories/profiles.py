@@ -2,9 +2,12 @@
 Profiles collection repository.
 """
 
+import logging
 from typing import Dict, Any, List, Optional
 from bson import ObjectId
 from datetime import datetime, timezone, date
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ProfilesRepository:
@@ -153,39 +156,12 @@ class ProfilesRepository:
                 max_birth_date, datetime.min.time()
             )
 
-        if "education_level" in criteria and criteria["education_level"] is not None:
-            base_query["education_level"] = criteria["education_level"]
-
-        if (
-            "subjects" in criteria
-            and criteria["subjects"]
-            and len(criteria["subjects"]) > 0
-        ):
-            base_query["subjects"] = {"$in": criteria["subjects"]}
-
         # Use the current user's looking_for_gender preference to filter profiles by gender
         if current_user_profile and current_user_profile.get("looking_for_gender"):
             base_query["gender"] = {"$in": current_user_profile["looking_for_gender"]}
 
-        # Filter by orientation
-        if (
-            "orientation" in criteria
-            and criteria["orientation"]
-            and len(criteria["orientation"]) > 0
-        ):
-            base_query["orientation"] = {"$in": criteria["orientation"]}
-
-        # Use the current user's looking_for preference to find compatible profiles
-        # Only return profiles that are looking for at least one of the same relationship types
-        if current_user_profile and current_user_profile.get("looking_for"):
-            # Use $elemMatch to find profiles where at least one looking_for value matches
-            base_query["looking_for"] = {
-                "$elemMatch": {"$in": current_user_profile["looking_for"]}
-            }
-
         # Handle location-based search with multiple locations and radii
         profiles_dict = {}  # Use dict to track unique profiles by _id
-
         if (
             "locations" in criteria
             and criteria["locations"]
@@ -197,32 +173,38 @@ class ProfilesRepository:
             # MongoDB $near doesn't support OR with multiple locations
             # So we perform multiple queries and combine results
             for location, radius in zip(criteria["locations"], criteria["radii"]):
+                LOGGER.info(f"Searching location: {location} with radius: {radius}")
                 if radius is not None and radius > 0:
                     # Create a copy of base query for this location
                     location_query = base_query.copy()
                     # Convert radius from km to meters (MongoDB uses meters)
                     radius_meters = radius * 1000
+
+                    # Build proper GeoJSON Point object for MongoDB
+                    # location is a dict with 'city_name' and 'coordinates'
+                    geojson_point = {
+                        "type": "Point",
+                        "coordinates": location.get("coordinates", [0, 0]),
+                    }
+
                     location_query["location"] = {
                         "$near": {
-                            "$geometry": location,
+                            "$geometry": geojson_point,
                             "$maxDistance": radius_meters,
                         }
                     }
-
+                    LOGGER.info(f"Location query: {location_query}")
                     # Execute query for this location
                     location_profiles = list(self.collection.find(location_query))
+                    LOGGER.info(
+                        f"Found {len(location_profiles)} profiles for location {location} within radius {radius} km"
+                    )
 
                     # Add profiles to dict (automatically handles duplicates)
                     for profile in location_profiles:
                         profile_id = str(profile["_id"])
                         if profile_id not in profiles_dict:
                             profiles_dict[profile_id] = profile
-
-            # If no valid locations with positive radius, just use base query
-            if not profiles_dict:
-                profiles = list(self.collection.find(base_query))
-                for profile in profiles:
-                    profiles_dict[str(profile["_id"])] = profile
         else:
             # No location criteria, just use base query
             profiles = list(self.collection.find(base_query))

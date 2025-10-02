@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Link, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
-import Logo from '../components/Logo';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { Button, Card, Input, Select, Modal, Badge, Loading } from '../components/ui';
-import 'leaflet/dist/leaflet.css';
+import { Button, Card, Select, Loading } from '../components/ui';
+import MapPicker from '../components/ui/MapPicker';
 
 const Icon = ({ path, className = "w-5 h-5" }: { path: string; className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
@@ -138,8 +136,6 @@ const EditProfilePage: React.FC = () => {
   const [lookingFor, setLookingFor] = useState<string[]>([]);
   const [lookingForGender, setLookingForGender] = useState<string[]>([]);
   const [subject, setSubject] = useState('');
-  const [profileExists, setProfileExists] = useState(false);
-  const [isMapVisible, setMapVisible] = useState(false);
 
   const icons = {
     user: "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z",
@@ -165,27 +161,10 @@ const EditProfilePage: React.FC = () => {
     content: '',
   });
 
-  // Map click handler component
-  const MapClickHandler = () => {
-    useMapEvents({
-      click: async (e) => {
-        const { lat, lng } = e.latlng;
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
-          const data = await response.json();
-          const cityName = data.address.city || data.address.town || data.address.village || 'Lieu inconnu';
-          setCity(cityName);
-          setCoordinates([lng, lat]); // Note: coordinates are [lng, lat] for consistency with backend
-        } catch (error) {
-          console.error("Error fetching city name:", error);
-          setCity(`${lat.toFixed(3)}, ${lng.toFixed(3)}`);
-          setCoordinates([lng, lat]);
-        } finally {
-          setMapVisible(false);
-        }
-      },
-    });
-    return null;
+  // Handler for MapPicker changes
+  const handleLocationChange = (newCity: string, newCoordinates: [number, number]) => {
+    setCity(newCity);
+    setCoordinates(newCoordinates);
   };
 
   // Load existing profile data
@@ -195,7 +174,6 @@ const EditProfilePage: React.FC = () => {
         const response = await api.get('/profiles/my-profile');
         const profile = response.data;
 
-        setProfileExists(true);
         setFirstName(profile.first_name || '');
         setAge(profile.age?.toString() || '');
         setGender(profile.gender || '');
@@ -224,7 +202,6 @@ const EditProfilePage: React.FC = () => {
       } catch (error: any) {
         if (error.response?.status === 404) {
           // Profile doesn't exist yet, that's okay
-          setProfileExists(false);
         } else {
           console.error('Error loading profile:', error);
         }
@@ -305,24 +282,10 @@ const EditProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex flex-col items-center p-4">
-      {/* Header with Logo */}
-      <div className="w-full max-w-2xl mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full p-2">
-              <Logo size="medium" className="text-white" />
-            </div>
-            <h1 className="text-2xl font-bold ml-3 text-gray-800">EducLove</h1>
-          </div>
-          <Link to="/profiles" className="text-gray-600 hover:text-purple-600 font-semibold text-sm">
-            ← Retour aux profils
-          </Link>
-        </div>
-      </div>
 
       <Card className="max-w-2xl w-full p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Modifier votre profil
+          Mon profil
         </h1>
 
         {/* Subtitle with first name, age, and gender */}
@@ -348,58 +311,16 @@ const EditProfilePage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="city">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Ville *
             </label>
-            <div className="flex gap-2">
-              <Input
-                id="city"
-                type="text"
-                placeholder="Ex: Paris, Lyon, Marseille..."
-                value={city}
-                onChange={(e) => {
-                  setCity(e.target.value);
-                  // Reset coordinates when city changes to trigger re-geocoding
-                  setCoordinates(null);
-                }}
-                required
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                onClick={() => setMapVisible(true)}
-                variant="primary"
-                size="md"
-                className="p-2"
-                title="Sélectionner sur la carte"
-              >
-                <Icon path={icons.mapPin} />
-              </Button>
-            </div>
-            {coordinates && (
-              <Badge variant="secondary" className="mt-1 text-xs">
-                <Icon path={icons.location} className="w-3 h-3 inline mr-1" />
-                Coordonnées: [{coordinates[0].toFixed(4)}, {coordinates[1].toFixed(4)}]
-              </Badge>
-            )}
+            <MapPicker
+              value={city}
+              coordinates={coordinates}
+              onChange={handleLocationChange}
+              placeholder="Ex: Paris, Lyon, Marseille..."
+            />
           </div>
-
-          {/* Map Modal */}
-          <Modal
-            isOpen={isMapVisible}
-            onClose={() => setMapVisible(false)}
-            title="Cliquez sur la carte pour choisir un lieu"
-          >
-            <div className="h-[500px] w-full">
-              <MapContainer center={[48.8566, 2.3522]} zoom={6} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <MapClickHandler />
-              </MapContainer>
-            </div>
-          </Modal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MultiSelect

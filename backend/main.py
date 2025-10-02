@@ -3,6 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from database.mongo_database import MongoDatabase
 from contextlib import asynccontextmanager
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+
+logger = logging.getLogger(__name__)
 
 # Import route modules
 from routes import auth, profiles, matches, registration
