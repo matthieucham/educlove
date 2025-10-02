@@ -15,7 +15,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import route modules
-from routes import auth, profiles, matches, registration
+from routes import auth, profiles, registration, profile_visits
 
 # Define the database instance
 db = MongoDatabase()
@@ -55,8 +55,8 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(profiles.router)
-app.include_router(matches.router)
 app.include_router(registration.router, prefix="/api")
+app.include_router(profile_visits.router)
 
 # Include development auth router if in development mode
 if os.getenv("SKIP_JWT_VERIFICATION", "false").lower() == "true":

@@ -1,8 +1,8 @@
 from database.database import Database
 from database.repositories.users import UsersRepository
 from database.repositories.profiles import ProfilesRepository
-from database.repositories.matches import MatchesRepository
 from database.repositories.search_criteria import SearchCriteriaRepository
+from database.repositories.profile_visits import ProfileVisitsRepository
 from pymongo import MongoClient
 from typing import Dict, Any, List, Optional
 from bson import ObjectId
@@ -20,8 +20,8 @@ class MongoDatabase(Database):
         self.db_name = db_name
         self.users_repo = None
         self.profiles_repo = None
-        self.matches_repo = None
         self.search_criteria_repo = None
+        self.profile_visits_repo = None
 
     def connect(self):
         try:
@@ -31,8 +31,8 @@ class MongoDatabase(Database):
             # Initialize repositories
             self.users_repo = UsersRepository(self.db)
             self.profiles_repo = ProfilesRepository(self.db)
-            self.matches_repo = MatchesRepository(self.db)
             self.search_criteria_repo = SearchCriteriaRepository(self.db)
+            self.profile_visits_repo = ProfileVisitsRepository(self.db)
 
             print("Successfully connected to MongoDB.")
         except Exception as e:
@@ -91,61 +91,6 @@ class MongoDatabase(Database):
     def update_user_last_login(self, user_id: str) -> bool:
         return self.users_repo.update_user_last_login(user_id)
 
-    # Match methods - delegate to MatchesRepository
-    def create_match(self, match_data: Dict[str, Any]) -> str:
-        return self.matches_repo.create_match(match_data)
-
-    def get_match(self, match_id: str) -> Optional[Dict[str, Any]]:
-        return self.matches_repo.get_match(match_id)
-
-    def get_user_matches(
-        self, user_id: str, status: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        # Get user's profile_id if they have one
-        user = self.get_user_by_id(user_id)
-        user_profile_id = user.get("profile_id") if user else None
-
-        return self.matches_repo.get_user_matches(user_id, user_profile_id, status)
-
-    def update_match_status(self, match_id: str, status: str, user_id: str) -> bool:
-        """
-        Update the status of a match.
-        Only the target user can accept/reject a match.
-        """
-        match = self.get_match(match_id)
-        if not match:
-            return False
-
-        # Get the target user's profile to verify they can update this match
-        user = self.get_user_by_id(user_id)
-        if not user or not user.get("profile_id"):
-            return False
-
-        # Check if the user is the target of the match
-        if match["target_profile_id"] != user["profile_id"]:
-            return False
-
-        return self.matches_repo.update_match_status(match_id, status)
-
-    def check_mutual_match(self, user1_id: str, user2_profile_id: str) -> bool:
-        """
-        Check if there's a mutual match between two users.
-        Returns True if both users have matched with each other and both matches are accepted.
-        """
-        # Get user1's profile_id
-        user1 = self.get_user_by_id(user1_id)
-        if not user1 or not user1.get("profile_id"):
-            return False
-
-        # Find user2's user account
-        user2 = self.users_repo.get_user_by_profile_id(user2_profile_id)
-        if not user2:
-            return False
-
-        return self.matches_repo.check_mutual_match(
-            user1_id, user1["profile_id"], user2["_id"], user2_profile_id
-        )
-
     # Search criteria methods - delegate to SearchCriteriaRepository
     def upsert_search_criteria(
         self, user_id: str, criteria_data: Dict[str, Any]
@@ -160,3 +105,26 @@ class MongoDatabase(Database):
     def delete_search_criteria(self, user_id: str) -> bool:
         """Delete search criteria for a user."""
         return self.search_criteria_repo.delete_search_criteria(user_id)
+
+    # Profile visit methods - delegate to ProfileVisitsRepository
+    def record_profile_visit(self, user_id: str, visited_profile_id: str) -> str:
+        """Record that a user visited a profile."""
+        return self.profile_visits_repo.record_visit(user_id, visited_profile_id)
+
+    def has_visited_profile(self, user_id: str, visited_profile_id: str) -> bool:
+        """Check if a user has visited a specific profile."""
+        return self.profile_visits_repo.has_visited(user_id, visited_profile_id)
+
+    def get_visited_profiles(
+        self, user_id: str, limit: int = 100, skip: int = 0
+    ) -> List[Dict[str, Any]]:
+        """Get the list of profiles a user has visited."""
+        return self.profile_visits_repo.get_visited_profiles(user_id, limit, skip)
+
+    def get_visited_profile_ids(self, user_id: str) -> List[str]:
+        """Get just the profile IDs that a user has visited."""
+        return self.profile_visits_repo.get_visited_profile_ids(user_id)
+
+    def get_visit_count(self, user_id: str) -> int:
+        """Get the total number of profiles a user has visited."""
+        return self.profile_visits_repo.get_visit_count(user_id)

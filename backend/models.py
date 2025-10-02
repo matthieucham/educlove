@@ -192,42 +192,22 @@ class User(BaseModel):
         }
 
 
-class MatchStatus(str, Enum):
-    pending = "pending"
-    accepted = "accepted"
-    rejected = "rejected"
-    blocked = "blocked"
+class ProfileVisit(BaseModel):
+    """Model for tracking profile visits with automatic expiration"""
 
-
-class Match(BaseModel):
-    """Match model representing a connection between two users"""
-
-    initiator_user_id: str = Field(..., description="User ID who initiated the match")
-    target_profile_id: str = Field(..., description="Profile ID of the matched person")
-    status: MatchStatus = Field(default=MatchStatus.pending)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    message: Optional[str] = Field(
-        None, max_length=500, description="Optional message with the match request"
+    user_id: str = Field(..., description="User ID who visited the profile")
+    visited_profile_id: str = Field(..., description="Profile ID that was visited")
+    visited_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp of the visit (used for TTL)",
     )
 
     class Config:
         from_attributes = True
-        use_enum_values = True
         json_schema_extra = {
             "example": {
-                "initiator_user_id": "507f1f77bcf86cd799439011",
-                "target_profile_id": "507f191e810c19729de860ea",
-                "status": "pending",
-                "message": "Hi! I'd love to connect with you.",
+                "user_id": "507f1f77bcf86cd799439011",
+                "visited_profile_id": "507f191e810c19729de860ea",
+                "visited_at": "2025-02-10T10:30:00Z",
             }
         }
-
-
-class MatchRequest(BaseModel):
-    """Request model for creating a new match"""
-
-    target_profile_id: str = Field(..., description="Profile ID to match with")
-    message: Optional[str] = Field(
-        None, max_length=500, description="Optional message with the match request"
-    )
