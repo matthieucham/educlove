@@ -422,3 +422,266 @@ def delete_my_search_criteria(
         )
 
     return {"message": "Search criteria deleted successfully"}
+
+
+# ============================================================================
+# MATCHING ROUTES
+# ============================================================================
+
+
+class LikeProfileRequest(BaseModel):
+    """Request model for liking a profile with a message"""
+
+    message: str = Field(
+        ..., min_length=1, max_length=500, description="Message to send with the like"
+    )
+
+
+@router.post("/{profile_id}:like")
+def like_profile(
+    profile_id: str,
+    request: LikeProfileRequest,
+    current_user: User = Depends(get_current_user),
+    db: "MongoDatabase" = Depends(get_db),
+):
+    """
+    Like a profile (send a match request) with a message.
+
+    This endpoint handles the matching logic:
+    - If the target profile has already liked the current user's profile (reverse match exists with PENDING status),
+      the match status is updated to ACCEPTED (mutual match)
+    - Otherwise, a new match is created with PENDING status
+    - A conversation is initiated with the provided message
+
+    Args:
+        profile_id: The ID of the profile to like
+        request: The request body containing the message
+        current_user: The authenticated user
+        db: Database connection
+
+    Returns:
+        Result of the like action including match status
+    """
+    # Get the current user's profile
+    user = db.get_user_by_sub(current_user.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if not user.get("profile_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must complete your profile before liking other profiles",
+        )
+
+    current_profile_id = user["profile_id"]
+
+    # Check if the target profile exists
+    target_profile = db.get_profile(profile_id)
+    if not target_profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found"
+        )
+
+    # Prevent users from liking their own profile
+    if current_profile_id == profile_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot like your own profile",
+        )
+
+    # Handle the like action with message
+    result = db.handle_profile_like(current_profile_id, profile_id, request.message)
+
+    return result
+
+
+@router.get("/my-matches")
+def get_my_matches(
+    status: Optional[str] = Query(
+        None,
+        description="Filter by match status (PENDING, ACCEPTED, REJECTED, BLOCKED)",
+    ),
+    current_user: User = Depends(get_current_user),
+    db: "MongoDatabase" = Depends(get_db),
+):
+    """
+    Get all matches for the current user's profile.
+
+    Args:
+        status: Optional status filter
+        current_user: The authenticated user
+        db: Database connection
+
+    Returns:
+        List of matches with profile information
+    """
+    # Get the current user's profile
+    user = db.get_user_by_sub(current_user.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if not user.get("profile_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must complete your profile to view matches",
+        )
+
+    profile_id = user["profile_id"]
+
+    # Get matches
+    matches = db.get_matches_for_profile(profile_id, status)
+
+    # Enrich matches with profile information
+    enriched_matches = []
+    for match in matches:
+        # Determine which profile to fetch (the other person's profile)
+        if match["initiator_profile_id"] == profile_id:
+            other_profile_id = match["target_profile_id"]
+            match_type = "sent"  # Current user initiated
+        else:
+            other_profile_id = match["initiator_profile_id"]
+            match_type = "received"  # Current user received
+
+        # Get the other person's profile
+        other_profile = db.get_profile(other_profile_id)
+
+        if other_profile:
+            enriched_match = {
+                "match_id": match["_id"],
+                "status": match["status"],
+                "match_type": match_type,
+                "created_at": match["created_at"],
+                "updated_at": match["updated_at"],
+                "profile": other_profile,
+            }
+            enriched_matches.append(enriched_match)
+
+    return {"matches": enriched_matches, "total": len(enriched_matches)}
+
+
+@router.get("/my-matches/accepted")
+def get_my_accepted_matches(
+    current_user: User = Depends(get_current_user),
+    db: "MongoDatabase" = Depends(get_db),
+):
+    """
+    Get all accepted (mutual) matches for the current user.
+
+    Returns:
+        List of accepted matches with profile information
+    """
+    # Get the current user's profile
+    user = db.get_user_by_sub(current_user.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if not user.get("profile_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must complete your profile to view matches",
+        )
+
+    profile_id = user["profile_id"]
+
+    # Get accepted matches
+    matches = db.get_accepted_matches(profile_id)
+
+    # Enrich matches with profile information
+    enriched_matches = []
+    for match in matches:
+        # Determine which profile to fetch
+        if match["initiator_profile_id"] == profile_id:
+            other_profile_id = match["target_profile_id"]
+        else:
+            other_profile_id = match["initiator_profile_id"]
+
+        # Get the other person's profile
+        other_profile = db.get_profile(other_profile_id)
+
+        if other_profile:
+            enriched_match = {
+                "match_id": match["_id"],
+                "created_at": match["created_at"],
+                "updated_at": match["updated_at"],
+                "profile": other_profile,
+            }
+            enriched_matches.append(enriched_match)
+
+    return {"matches": enriched_matches, "total": len(enriched_matches)}
+
+
+@router.get("/my-matches/pending")
+def get_my_pending_matches(
+    match_type: Optional[str] = Query(
+        None, description="Filter by 'sent' or 'received'"
+    ),
+    current_user: User = Depends(get_current_user),
+    db: "MongoDatabase" = Depends(get_db),
+):
+    """
+    Get pending matches for the current user.
+
+    Args:
+        match_type: Optional filter - 'sent' for matches initiated by user, 'received' for matches received
+
+    Returns:
+        List of pending matches with profile information
+    """
+    # Get the current user's profile
+    user = db.get_user_by_sub(current_user.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if not user.get("profile_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must complete your profile to view matches",
+        )
+
+    profile_id = user["profile_id"]
+
+    # Get pending matches based on type
+    if match_type == "sent":
+        matches = db.get_pending_matches_sent(profile_id)
+    elif match_type == "received":
+        matches = db.get_pending_matches_received(profile_id)
+    else:
+        # Get all pending matches
+        matches = db.get_matches_for_profile(profile_id, status="PENDING")
+
+    # Enrich matches with profile information
+    enriched_matches = []
+    for match in matches:
+        # Determine which profile to fetch and match type
+        if match["initiator_profile_id"] == profile_id:
+            other_profile_id = match["target_profile_id"]
+            current_match_type = "sent"
+        else:
+            other_profile_id = match["initiator_profile_id"]
+            current_match_type = "received"
+
+        # Skip if filtering and doesn't match the requested type
+        if match_type and current_match_type != match_type:
+            continue
+
+        # Get the other person's profile
+        other_profile = db.get_profile(other_profile_id)
+
+        if other_profile:
+            enriched_match = {
+                "match_id": match["_id"],
+                "match_type": current_match_type,
+                "created_at": match["created_at"],
+                "profile": other_profile,
+            }
+            enriched_matches.append(enriched_match)
+
+    return {"matches": enriched_matches, "total": len(enriched_matches)}

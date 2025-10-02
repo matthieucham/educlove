@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import List, Optional
 from enum import Enum
 from datetime import datetime, timezone, date
+from constants import MatchStatus
 
 
 class LookingForEnum(str, Enum):
@@ -209,5 +210,41 @@ class ProfileVisit(BaseModel):
                 "user_id": "507f1f77bcf86cd799439011",
                 "visited_profile_id": "507f191e810c19729de860ea",
                 "visited_at": "2025-02-10T10:30:00Z",
+            }
+        }
+
+
+class Match(BaseModel):
+    """Model for tracking matches between profiles"""
+
+    initiator_profile_id: str = Field(
+        ..., description="Profile ID of the user who initiated the match"
+    )
+    target_profile_id: str = Field(
+        ..., description="Profile ID of the user who was targeted for the match"
+    )
+    status: MatchStatus = Field(
+        default=MatchStatus.PENDING,
+        description="Current status of the match (PENDING, ACCEPTED, REJECTED, BLOCKED)",
+    )
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp when the match was created",
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp when the match was last updated",
+    )
+
+    class Config:
+        from_attributes = True
+        use_enum_values = True
+        json_schema_extra = {
+            "example": {
+                "initiator_profile_id": "507f1f77bcf86cd799439011",
+                "target_profile_id": "507f191e810c19729de860ea",
+                "status": "PENDING",
+                "created_at": "2025-02-10T10:30:00Z",
+                "updated_at": "2025-02-10T10:30:00Z",
             }
         }

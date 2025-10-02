@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button, Card } from '../components/ui';
-import { MapPin, Heart, Quote, User, Calendar, Users, MessageCircle, PawPrint, Settings } from 'lucide-react';
+import { Button, Card, Modal } from '../components/ui';
+import { MapPin, Heart, Quote, User, Calendar, Users, MessageCircle, PawPrint, Settings, Send } from 'lucide-react';
 import { api } from '../services/api';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
 
@@ -52,6 +52,9 @@ const ProfilePage: React.FC = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showLeftButtonLabel, setShowLeftButtonLabel] = useState(true);
   const [showRightButtonLabel, setShowRightButtonLabel] = useState(true);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [message, setMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
   const leftButtonRef = useRef<HTMLButtonElement>(null);
   const rightButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -193,8 +196,41 @@ const ProfilePage: React.FC = () => {
 
 
   const handleMatch = () => {
-    // TODO: Implement match functionality
-    navigate('/chats');
+    // Show modal to send a message with the like
+    setShowMessageModal(true);
+  };
+
+  const handleSendLike = async () => {
+    if (!profile || !message.trim()) return;
+
+    setSendingMessage(true);
+    try {
+      // Send like with message
+      const response = await api.post(`/profiles/${profile.id}:like`, {
+        message: message.trim()
+      });
+
+      // Check if it's a mutual match
+      if (response.data.action === 'mutual_match') {
+        // Navigate to messages/chat
+        navigate('/chats');
+      } else {
+        // Show next profile
+        setMessage('');
+        setShowMessageModal(false);
+        showNextProfile();
+      }
+    } catch (error) {
+      console.error('Error sending like:', error);
+      alert('Une erreur est survenue lors de l\'envoi du message.');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleCancelMessage = () => {
+    setMessage('');
+    setShowMessageModal(false);
   };
 
   const showNextProfile = useCallback(() => {
@@ -536,6 +572,52 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
           </Card>
+
+          {/* Message Modal */}
+          <Modal
+            isOpen={showMessageModal}
+            onClose={handleCancelMessage}
+            title="Envoyer un message"
+          >
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Présentez-vous à {profile.first_name} avec un message personnalisé :
+              </p>
+
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Bonjour ! J'ai vu ton profil et j'aimerais faire connaissance..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                rows={4}
+                maxLength={500}
+                autoFocus
+              />
+
+              <div className="text-sm text-gray-500 text-right">
+                {message.length}/500 caractères
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  onClick={handleCancelMessage}
+                  variant="secondary"
+                  disabled={sendingMessage}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleSendLike}
+                  variant="primary"
+                  disabled={!message.trim() || sendingMessage}
+                  className="flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  {sendingMessage ? 'Envoi...' : 'Envoyer'}
+                </Button>
+              </div>
+            </div>
+          </Modal>
         </div>
       )}
     </div>

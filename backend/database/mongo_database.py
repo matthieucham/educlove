@@ -3,6 +3,8 @@ from database.repositories.users import UsersRepository
 from database.repositories.profiles import ProfilesRepository
 from database.repositories.search_criteria import SearchCriteriaRepository
 from database.repositories.profile_visits import ProfileVisitsRepository
+from database.repositories.matches import MatchesRepository
+from database.repositories.conversations import ConversationsRepository
 from pymongo import MongoClient
 from typing import Dict, Any, List, Optional
 from bson import ObjectId
@@ -22,6 +24,8 @@ class MongoDatabase(Database):
         self.profiles_repo = None
         self.search_criteria_repo = None
         self.profile_visits_repo = None
+        self.matches_repo = None
+        self.conversations_repo = None
 
     def connect(self):
         try:
@@ -33,6 +37,8 @@ class MongoDatabase(Database):
             self.profiles_repo = ProfilesRepository(self.db)
             self.search_criteria_repo = SearchCriteriaRepository(self.db)
             self.profile_visits_repo = ProfileVisitsRepository(self.db)
+            self.matches_repo = MatchesRepository(self.db)
+            self.conversations_repo = ConversationsRepository(self.db)
 
             print("Successfully connected to MongoDB.")
         except Exception as e:
@@ -128,3 +134,105 @@ class MongoDatabase(Database):
     def get_visit_count(self, user_id: str) -> int:
         """Get the total number of profiles a user has visited."""
         return self.profile_visits_repo.get_visit_count(user_id)
+
+    # Match methods - delegate to MatchesRepository
+    def handle_profile_like(
+        self, current_profile_id: str, target_profile_id: str, message: str = None
+    ) -> Dict[str, Any]:
+        """
+        Handle a like action from one profile to another with an optional message.
+        Creates a conversation with the initial message if provided.
+        """
+        # Get the current user's profile to get their name
+        current_profile = self.get_profile(current_profile_id)
+        if not current_profile:
+            return {"action": "error", "message": "Current user profile not found"}
+
+        # Handle the like with message
+        result = self.matches_repo.handle_like(
+            current_profile_id, target_profile_id, message
+        )
+
+        # If a message was provided and the like was successful, create/update conversation
+        if message and result["action"] in ["like_sent", "mutual_match"]:
+            match_id = result["match_id"]
+            sender_name = current_profile.get("first_name", "Unknown")
+
+            if result["action"] == "like_sent":
+                # Create new conversation with the initial message
+                self.conversations_repo.create_conversation(
+                    match_id, current_profile_id, sender_name, message
+                )
+            elif result["action"] == "mutual_match":
+                # It's a mutual match - add the second message to the conversation
+                # First check if conversation exists (it should from the reverse match)
+                if self.conversations_repo.conversation_exists(match_id):
+                    # Add the mutual match message
+                    self.conversations_repo.add_message(
+                        match_id, current_profile_id, sender_name, message
+                    )
+                else:
+                    # If no conversation exists yet (shouldn't happen but handle it)
+                    # Get the other person's profile for their initial message
+                    target_profile = self.get_profile(target_profile_id)
+                    if target_profile and result.get("reverse_match_message"):
+                        # Create conversation with both messages
+                        self.conversations_repo.create_conversation(
+                            match_id,
+                            target_profile_id,
+                            target_profile.get("first_name", "Unknown"),
+                            result["reverse_match_message"],
+                        )
+                        # Add the current user's message
+                        self.conversations_repo.add_message(
+                            match_id, current_profile_id, sender_name, message
+                        )
+
+        return result
+
+    def get_matches_for_profile(
+        self, profile_id: str, status: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Get matches for a profile, optionally filtered by status."""
+        return self.matches_repo.get_matches_for_profile(profile_id, status)
+
+    def get_accepted_matches(self, profile_id: str) -> List[Dict[str, Any]]:
+        """Get all accepted (mutual) matches for a profile."""
+        return self.matches_repo.get_accepted_matches(profile_id)
+
+    def get_pending_matches_received(self, profile_id: str) -> List[Dict[str, Any]]:
+        """Get pending matches where the profile is the target."""
+        return self.matches_repo.get_pending_matches_received(profile_id)
+
+    def get_pending_matches_sent(self, profile_id: str) -> List[Dict[str, Any]]:
+        """Get pending matches where the profile is the initiator."""
+        return self.matches_repo.get_pending_matches_sent(profile_id)
+
+    def is_matched(self, profile1_id: str, profile2_id: str) -> bool:
+        """Check if two profiles have an accepted match."""
+        return self.matches_repo.is_matched(profile1_id, profile2_id)
+
+    # Conversation methods - delegate to ConversationsRepository
+    def get_conversation(
+        self, match_id: str, limit: Optional[int] = None, skip: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """Get all messages for a conversation."""
+        return self.conversations_repo.get_conversation(match_id, limit, skip)
+
+    def send_message(
+        self, match_id: str, sender_profile_id: str, sender_name: str, message: str
+    ) -> bool:
+        """Send a message in a conversation."""
+        return self.conversations_repo.add_message(
+            match_id, sender_profile_id, sender_name, message
+        )
+
+    def get_conversation_summary(self, match_id: str) -> Dict[str, Any]:
+        """Get a summary of a conversation."""
+        return self.conversations_repo.get_conversation_summary(match_id)
+
+    def get_conversations_for_matches(
+        self, match_ids: List[str]
+    ) -> Dict[str, Dict[str, Any]]:
+        """Get conversation summaries for multiple matches."""
+        return self.conversations_repo.get_conversations_for_matches(match_ids)
