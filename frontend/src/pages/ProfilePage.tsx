@@ -42,12 +42,12 @@ interface UserProfile {
 const ProfilePage: React.FC = () => {
   const { profileId } = useParams<{ profileId: string }>();
   const navigate = useNavigate();
-  const [profiles, setProfiles] = useState<ProfileData[]>([]);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [checkingCriteria, setCheckingCriteria] = useState(true);
+  const [fetchingNewProfile, setFetchingNewProfile] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showLeftButtonLabel, setShowLeftButtonLabel] = useState(true);
@@ -104,7 +104,7 @@ const ProfilePage: React.FC = () => {
     if (rightButtonRef.current) resizeObserver.observe(rightButtonRef.current);
 
     return () => resizeObserver.disconnect();
-  }, [profiles]);
+  }, [profile]);
 
   // Check if user has search criteria, if not redirect to SearchCriteriaPage
   useEffect(() => {
@@ -142,24 +142,25 @@ const ProfilePage: React.FC = () => {
     fetchUserProfile();
   }, []);
 
-  // Fetch profiles from backend
-  useEffect(() => {
-    // Don't fetch profiles until we've confirmed search criteria exists
+  // Fetch a single profile from backend
+  const fetchProfile = useCallback(async () => {
     if (checkingCriteria) return;
 
-    const fetchProfiles = async () => {
-      try {
-        const response = await api.get('/profiles/');
-        const data = response.data;
+    setFetchingNewProfile(true);
+    try {
+      const response = await api.get('/profiles/');
+      const data = response.data;
 
-        // Store search criteria from response
-        if (data.search_criteria) {
-          setSearchCriteria(data.search_criteria);
-        }
+      // Store search criteria from response
+      if (data.search_criteria) {
+        setSearchCriteria(data.search_criteria);
+      }
 
+      // Check if we got a profile
+      if (data.profiles && data.profiles.length > 0) {
+        const p = data.profiles[0];
         // Transform backend data to match our interface
-        // Note: age must be computed on backend, date_of_birth should never be sent to frontend
-        const transformedProfiles = (data.profiles || data).map((p: any) => ({
+        const transformedProfile: ProfileData = {
           id: p._id || p.id,
           first_name: p.first_name,
           age: p.age, // Age must come from backend, never compute on frontend
@@ -172,27 +173,33 @@ const ProfilePage: React.FC = () => {
           favorite_quote: p.favorite_quote,
           exclusivity_view: p.exclusivity_view,
           has_pet: p.has_pet
-        }));
-        setProfiles(transformedProfiles);
+        };
+        setProfile(transformedProfile);
 
-        // If profileId is provided, find that profile's index
-        if (profileId) {
-          const index = transformedProfiles.findIndex((p: ProfileData) => p.id === profileId);
-          if (index !== -1) {
-            setCurrentProfileIndex(index);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching profiles:', error);
-        // On error, don't show any profiles
-        setProfiles([]);
-      } finally {
-        setLoading(false);
+        // Update URL with the new profile ID
+        const newUrl = window.location.pathname.includes('profile-demo')
+          ? `/profile-demo/${transformedProfile.id}`
+          : `/profile/${transformedProfile.id}`;
+        window.history.replaceState(null, '', newUrl);
+      } else {
+        // No more profiles available
+        setProfile(null);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+      setFetchingNewProfile(false);
+    }
+  }, [checkingCriteria]);
 
-    fetchProfiles();
-  }, [profileId, checkingCriteria]);
+  // Initial profile fetch
+  useEffect(() => {
+    if (!checkingCriteria) {
+      fetchProfile();
+    }
+  }, [checkingCriteria, fetchProfile]);
 
   // Function to record profile visit
   const recordProfileVisit = async (profileId: string) => {
@@ -206,9 +213,8 @@ const ProfilePage: React.FC = () => {
 
   const handleMatch = async () => {
     // Record profile visit when user clicks "J'aimerais te connaitre"
-    const currentProfile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
-    if (currentProfile) {
-      await recordProfileVisit(currentProfile.id);
+    if (profile) {
+      await recordProfileVisit(profile.id);
     }
     // Show modal to send a message with the like
     setShowMessageModal(true);
@@ -229,10 +235,10 @@ const ProfilePage: React.FC = () => {
         // Navigate to messages/chat
         navigate('/chats');
       } else {
-        // Show next profile
+        // Fetch a new profile after successful like
         setMessage('');
         setShowMessageModal(false);
-        showNextProfile();
+        await fetchProfile();
       }
     } catch (error) {
       console.error('Error sending like:', error);
@@ -248,22 +254,14 @@ const ProfilePage: React.FC = () => {
   };
 
   const showNextProfile = useCallback(async () => {
-    if (profiles.length === 0) return;
+    if (!profile || fetchingNewProfile) return;
 
     // Record profile visit when user clicks "Voir d'autres profils"
-    const currentProfile = profiles[currentProfileIndex];
-    if (currentProfile) {
-      await recordProfileVisit(currentProfile.id);
-    }
+    await recordProfileVisit(profile.id);
 
-    const nextIndex = (currentProfileIndex + 1) % profiles.length;
-    setCurrentProfileIndex(nextIndex);
-    // Update URL without full navigation
-    const newUrl = window.location.pathname.includes('profile-demo')
-      ? `/profile-demo/${profiles[nextIndex].id}`
-      : `/profile/${profiles[nextIndex].id}`;
-    window.history.replaceState(null, '', newUrl);
-  }, [currentProfileIndex, profiles]);
+    // Fetch a new profile
+    await fetchProfile();
+  }, [profile, fetchingNewProfile, fetchProfile]);
 
   // Touch handlers for swipe
   const onTouchStart = (e: React.TouchEvent) => {
@@ -282,19 +280,13 @@ const ProfilePage: React.FC = () => {
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
-    const currentProfile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
-
-    if (isLeftSwipe) {
+    if (isLeftSwipe && profile) {
       // Record profile visit when swiping left
-      if (currentProfile) {
-        await recordProfileVisit(currentProfile.id);
-      }
+      await recordProfileVisit(profile.id);
       showNextProfile();
-    } else if (isRightSwipe) {
+    } else if (isRightSwipe && profile) {
       // Record profile visit when swiping right
-      if (currentProfile) {
-        await recordProfileVisit(currentProfile.id);
-      }
+      await recordProfileVisit(profile.id);
       handleMatch();
     }
   };
@@ -302,26 +294,22 @@ const ProfilePage: React.FC = () => {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = async (e: KeyboardEvent) => {
-      const currentProfile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
+      if (!profile || fetchingNewProfile) return;
 
       if (e.key === 'ArrowLeft') {
         // Record profile visit when using arrow key
-        if (currentProfile) {
-          await recordProfileVisit(currentProfile.id);
-        }
+        await recordProfileVisit(profile.id);
         showNextProfile();
       } else if (e.key === 'ArrowRight') {
         // Record profile visit when using arrow key
-        if (currentProfile) {
-          await recordProfileVisit(currentProfile.id);
-        }
+        await recordProfileVisit(profile.id);
         handleMatch();
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showNextProfile, handleMatch, profiles, currentProfileIndex]);
+  }, [showNextProfile, handleMatch, profile, fetchingNewProfile]);
 
   const getGenderDisplay = (gender: string) => {
     switch (gender) {
@@ -353,8 +341,6 @@ const ProfilePage: React.FC = () => {
       </div>
     );
   }
-
-  const profile = profiles.length > 0 ? profiles[currentProfileIndex] : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100">
@@ -577,7 +563,7 @@ const ProfilePage: React.FC = () => {
               <button
                 ref={leftButtonRef}
                 onClick={showNextProfile}
-                disabled={profiles.length <= 1}
+                disabled={fetchingNewProfile}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex-1 min-w-0"
                 title="Voir d'autres profils"
               >
@@ -599,19 +585,10 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
 
-            {/* Profile indicator */}
-            {profiles.length > 1 && (
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm text-gray-600">
-                {currentProfileIndex + 1} / {profiles.length}
-              </div>
-            )}
-
             {/* Swipe hint */}
-            {profiles.length > 1 && (
-              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1">
-                ← Glissez pour naviguer →
-              </div>
-            )}
+            <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1">
+              ← Glissez pour naviguer →
+            </div>
           </Card>
 
           {/* Message Modal */}

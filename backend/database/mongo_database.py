@@ -81,6 +81,36 @@ class MongoDatabase(Database):
         # The search_profiles method will use the profile for gender and looking_for preferences
         return self.profiles_repo.search_profiles(criteria, current_user_profile)
 
+    def get_random_profile_for_user(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get a single random profile for a user based on their search criteria,
+        excluding profiles they have already visited.
+
+        Args:
+            user_id: The ID of the user requesting a profile
+
+        Returns:
+            A single random profile matching criteria, or None if no matches
+        """
+        # Get the current user's profile for preferences
+        user = self.get_user_by_id(user_id)
+        current_user_profile = None
+        if user and user.get("profile_id"):
+            current_user_profile = self.get_profile(user["profile_id"])
+
+        # Get the user's search criteria
+        criteria = self.search_criteria_repo.get_search_criteria(user_id)
+        if not criteria:
+            criteria = {}  # Use empty criteria if none saved
+
+        # Get the list of visited profile IDs
+        visited_profile_ids = self.profile_visits_repo.get_visited_profile_ids(user_id)
+
+        # Get a random profile excluding visited ones
+        return self.profiles_repo.get_random_profile_excluding_visited(
+            criteria, current_user_profile, visited_profile_ids
+        )
+
     # User methods - delegate to UsersRepository
     def upsert_user(self, user_data: Dict[str, Any]) -> str:
         return self.users_repo.upsert_user(user_data)

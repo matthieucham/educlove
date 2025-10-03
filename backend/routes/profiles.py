@@ -49,8 +49,10 @@ def get_profiles_for_user(
     db: "MongoDatabase" = Depends(get_db),
 ):
     """
-    Get profiles filtered by the current user's search criteria.
-    If no criteria are saved, returns all profiles.
+    Get a single random profile filtered by the current user's search criteria,
+    excluding profiles the user has already visited.
+    If no criteria are saved, uses default matching logic.
+    Returns None if no eligible profiles are found.
     """
     # Get user ID from the authenticated user
     user = db.get_user_by_sub(current_user.sub)
@@ -59,17 +61,28 @@ def get_profiles_for_user(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    # Get profiles using the user's search criteria
-    profiles = db.search_profiles_with_user_criteria(user["_id"])
+    # Get a single random profile excluding visited ones
+    profile = db.get_random_profile_for_user(user["_id"])
 
-    # Get the user's search criteria to return with the profiles
+    # Get the user's search criteria to return with the response
     search_criteria = db.get_search_criteria(user["_id"])
 
-    return {
-        "profiles": profiles,
-        "total": len(profiles),
-        "search_criteria": search_criteria,
-    }
+    if profile:
+        # Return a single profile in an array for backward compatibility
+        # Frontend expects an array of profiles
+        return {
+            "profiles": [profile],
+            "total": 1,
+            "search_criteria": search_criteria,
+        }
+    else:
+        # No eligible profiles found
+        return {
+            "profiles": [],
+            "total": 0,
+            "search_criteria": search_criteria,
+            "message": "No more profiles available matching your criteria",
+        }
 
 
 # ============================================================================

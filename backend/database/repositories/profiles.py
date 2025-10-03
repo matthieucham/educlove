@@ -296,3 +296,171 @@ class ProfilesRepository:
             )
         except:
             return False
+
+    def get_random_profile_excluding_visited(
+        self,
+        criteria: Dict[str, Any],
+        current_user_profile: Dict[str, Any] = None,
+        visited_profile_ids: List[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get a single random profile based on search criteria, excluding visited profiles.
+        Uses MongoDB aggregation pipeline for efficient querying.
+
+        Args:
+            criteria: Search criteria including age, location, subjects, etc.
+            current_user_profile: The profile of the current user doing the search
+            visited_profile_ids: List of profile IDs that should be excluded
+
+        Returns:
+            A single random profile matching the criteria, or None if no matches found
+        """
+        # Build aggregation pipeline
+        pipeline = []
+
+        # Stage 1: Match base criteria
+        match_stage = {}
+
+        # Exclude visited profiles
+        if visited_profile_ids:
+            # Convert string IDs to ObjectIds
+            visited_object_ids = []
+            for pid in visited_profile_ids:
+                try:
+                    visited_object_ids.append(ObjectId(pid))
+                except:
+                    pass  # Skip invalid IDs
+
+            if visited_object_ids:
+                match_stage["_id"] = {"$nin": visited_object_ids}
+
+        # Age filtering using date_of_birth
+        today = date.today()
+        age_min = criteria.get("age_min")
+        age_max = criteria.get("age_max")
+
+        if age_max is not None:
+            min_birth_date = date(today.year - age_max - 1, today.month, today.day)
+            match_stage.setdefault("date_of_birth", {})["$gt"] = datetime.combine(
+                min_birth_date, datetime.min.time()
+            )
+
+        if age_min is not None:
+            max_birth_date = date(today.year - age_min, today.month, today.day)
+            match_stage.setdefault("date_of_birth", {})["$lte"] = datetime.combine(
+                max_birth_date, datetime.min.time()
+            )
+
+        # Gender filtering based on current user's looking_for preference
+        if current_user_profile and current_user_profile.get("looking_for_gender"):
+            match_stage["gender"] = {"$in": current_user_profile["looking_for_gender"]}
+
+        # Filter by profiles looking for current user's gender
+        if current_user_profile and current_user_profile.get("gender"):
+            match_stage["looking_for_gender"] = current_user_profile["gender"]
+
+        # Add match stage if we have any criteria
+        if match_stage:
+            pipeline.append({"$match": match_stage})
+
+        # Stage 2: Handle location-based filtering
+        # If we have location criteria, we need to handle them specially
+        if (
+            "locations" in criteria
+            and criteria["locations"]
+            and len(criteria["locations"]) > 0
+            and "radii" in criteria
+            and criteria["radii"]
+            and len(criteria["radii"]) > 0
+        ):
+            # Build OR conditions for multiple locations
+            location_conditions = []
+            for location, radius in zip(criteria["locations"], criteria["radii"]):
+                if radius is not None and radius > 0:
+                    # Convert radius from km to meters
+                    radius_meters = radius * 1000
+
+                    # Create geoNear condition for this location
+                    location_conditions.append(
+                        {
+                            "$geoNear": {
+                                "near": {
+                                    "type": "Point",
+                                    "coordinates": location.get("coordinates", [0, 0]),
+                                },
+                                "distanceField": "distance",
+                                "maxDistance": radius_meters,
+                                "spherical": True,
+                            }
+                        }
+                    )
+
+            # For multiple locations, we need to use a different approach
+            # Since $geoNear must be the first stage, we'll use a simpler approach
+            # We'll get profiles near any of the locations
+            if location_conditions:
+                # Use the first location for $geoNear (MongoDB limitation)
+                first_location = criteria["locations"][0]
+                first_radius = criteria["radii"][0]
+                if first_radius and first_radius > 0:
+                    # Insert geoNear as first stage
+                    pipeline.insert(
+                        0,
+                        {
+                            "$geoNear": {
+                                "near": {
+                                    "type": "Point",
+                                    "coordinates": first_location.get(
+                                        "coordinates", [0, 0]
+                                    ),
+                                },
+                                "distanceField": "distance",
+                                "maxDistance": first_radius * 1000,
+                                "spherical": True,
+                                "query": match_stage,  # Include match criteria in geoNear
+                            }
+                        },
+                    )
+                    # Remove the separate match stage since it's included in geoNear
+                    if match_stage in pipeline:
+                        pipeline.remove({"$match": match_stage})
+
+        # Stage 3: Sample a random document
+        pipeline.append({"$sample": {"size": 1}})
+
+        # Execute aggregation pipeline
+        try:
+            results = list(self.collection.aggregate(pipeline))
+
+            if results:
+                profile = results[0]
+                # Convert ObjectId to string
+                profile["_id"] = str(profile["_id"])
+
+                # Transform GeoJSON back to simple format
+                if "location" in profile and profile["location"].get("type") == "Point":
+                    profile["location"] = {
+                        "city_name": profile["location"].get("city_name", ""),
+                        "coordinates": profile["location"]["coordinates"],
+                    }
+
+                # Compute age
+                if "date_of_birth" in profile:
+                    dob = profile["date_of_birth"]
+                    if isinstance(dob, str):
+                        dob = datetime.fromisoformat(dob).date()
+                    elif isinstance(dob, datetime):
+                        dob = dob.date()
+                    profile["age"] = (
+                        today.year
+                        - dob.year
+                        - ((today.month, today.day) < (dob.month, dob.day))
+                    )
+
+                return profile
+
+            return None
+
+        except Exception as e:
+            LOGGER.error(f"Error in get_random_profile_excluding_visited: {e}")
+            return None

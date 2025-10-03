@@ -13,12 +13,13 @@ class TestProfiles:
     def test_get_profiles_for_user_no_criteria(
         self, client, auth_headers, app_with_mock_db
     ):
-        """Test getting profiles when user has no search criteria."""
+        """Test getting a single random profile when user has no search criteria."""
         # Configure the mock
         mock_db = app_with_mock_db.mock_db
         mock_db.get_user_by_sub.return_value = {"_id": TEST_USER_ID}
         mock_db.get_search_criteria.return_value = None
-        mock_db.search_profiles_with_user_criteria.return_value = SAMPLE_PROFILES
+        # Now returns a single random profile
+        mock_db.get_random_profile_for_user.return_value = SAMPLE_PROFILES[0]
 
         # Make request
         response = client.get("/profiles/", headers=auth_headers)
@@ -26,16 +27,14 @@ class TestProfiles:
         # Assertions
         assert response.status_code == 200
         data = response.json()
-        assert data["total"] == 3
-        assert len(data["profiles"]) == 3
+        assert data["total"] == 1
+        assert len(data["profiles"]) == 1
         assert data["profiles"][0]["first_name"] == "Alice"
-        assert data["profiles"][1]["first_name"] == "Bob"
-        assert data["profiles"][2]["first_name"] == "Clara"
 
     def test_get_profiles_for_user_with_criteria(
         self, client, auth_headers, app_with_mock_db
     ):
-        """Test getting profiles when user has search criteria."""
+        """Test getting a single random profile when user has search criteria."""
         # Configure the mock
         mock_db = app_with_mock_db.mock_db
         mock_db.get_user_by_sub.return_value = {"_id": TEST_USER_ID}
@@ -44,11 +43,8 @@ class TestProfiles:
             "age_min": 25,
             "age_max": 35,
         }
-        # Return filtered profiles
-        mock_db.search_profiles_with_user_criteria.return_value = [
-            SAMPLE_PROFILES[0],
-            SAMPLE_PROFILES[2],
-        ]
+        # Return a single random profile
+        mock_db.get_random_profile_for_user.return_value = SAMPLE_PROFILES[0]
 
         # Make request
         response = client.get("/profiles/", headers=auth_headers)
@@ -56,8 +52,8 @@ class TestProfiles:
         # Assertions
         assert response.status_code == 200
         data = response.json()
-        assert data["total"] == 2
-        assert len(data["profiles"]) == 2
+        assert data["total"] == 1
+        assert len(data["profiles"]) == 1
         assert data["search_criteria"]["gender"] == ["Femme"]
 
     def test_get_profiles_unauthorized(self, client):
@@ -83,16 +79,15 @@ class TestMyProfile:
         # Profile data
         profile_data = {
             "first_name": "Test",
-            "age": 30,
+            "date_of_birth": "1994-01-01",
+            "gender": "MALE",
             "location": {
-                "type": "Point",
-                "coordinates": PARIS_COORDS,
                 "city_name": "Paris",
+                "coordinates": PARIS_COORDS,
             },
-            "looking_for": "Relation sérieuse",
+            "looking_for": ["SERIOUS"],
+            "looking_for_gender": ["FEMALE"],
             "subject": "Mathématiques",
-            "experience_years": 5,
-            "photos": [],
             "description": "Test description",
             "goals": "Test goals",
             "email": "test@example.com",
@@ -130,16 +125,15 @@ class TestMyProfile:
         # Complete profile data with all required fields
         profile_data = {
             "first_name": "Test",
-            "age": 30,
+            "date_of_birth": "1994-01-01",
+            "gender": "MALE",
             "location": {
-                "type": "Point",
-                "coordinates": PARIS_COORDS,
                 "city_name": "Paris",
+                "coordinates": PARIS_COORDS,
             },
-            "looking_for": "Relation sérieuse",
+            "looking_for": ["SERIOUS"],
+            "looking_for_gender": ["FEMALE"],
             "subject": "Mathématiques",
-            "experience_years": 5,
-            "photos": [],
             "description": "Test description",
             "goals": "Test goals",
             "email": "test@example.com",
@@ -197,17 +191,13 @@ class TestMyProfile:
 
         # Complete updated profile data with all required fields
         profile_data = {
-            "first_name": "Updated",
-            "age": 31,
             "location": {
-                "type": "Point",
-                "coordinates": PARIS_COORDS,
                 "city_name": "Paris",
+                "coordinates": PARIS_COORDS,
             },
-            "looking_for": "Relation sérieuse",
+            "looking_for": ["SERIOUS"],
+            "looking_for_gender": ["FEMALE"],
             "subject": "Mathématiques",
-            "experience_years": 5,
-            "photos": [],
             "description": "Updated description",
             "goals": "Updated goals",
             "email": "test@example.com",
@@ -220,8 +210,12 @@ class TestMyProfile:
 
         # Assertions
         assert response.status_code == 200
-        # Note: Update is not yet implemented, so we get a placeholder response
-        assert "update not yet implemented" in response.json()["message"]
+        data = response.json()
+        assert data["profile_id"] == "test-profile-1"
+        assert data["message"] == "Profile updated successfully"
+
+        # Verify the update was called with correct data
+        mock_db.profiles_repo.update_profile.assert_called_once()
 
     def test_delete_my_profile(self, client, auth_headers, app_with_mock_db):
         """Test deleting the authenticated user's profile."""
